@@ -13,15 +13,15 @@ The repository initially contained Phase 1 design docs, ADR-001..008, and `tools
 |---|---|---|
 | P2-01 | Python 3.13 FastAPI factory, environment validation, version-pinned dependency manifest | Independent config/startup unit coverage; real DB startup LOCAL_USER |
 | P2-02 | @inject, annotation constructor resolution, convention scan, singleton/transient and strict controller import errors | Unit tests; test fixtures are not production providers |
-| P2-03 | SQLAlchemy Async engine/sessionmaker, PsqlDbContext, shared engine, BaseRepository and atomic transaction context | Real PostgreSQL LOCAL_USER required; no Postgres available on current runner |
+| P2-03 | SQLAlchemy Async engine/sessionmaker, PsqlDbContext, shared engine, BaseRepository and atomic transaction context | Real PostgreSQL PASSED in isolated GitHub CI (2 integration tests); Windows-local evidence pending |
 | P2-04 | No unapproved physical business tables created | BLOCKED DEC-01, DEC-02, DEC-08, DEC-11 |
-| P2-05 | Transaction context available in Infrastructure; no fabricated idempotency table/API | PostgreSQL rollback test LOCAL_USER; idempotency policy BLOCKED DEC-07/11 |
+| P2-05 | Transaction context available in Infrastructure; no fabricated idempotency table/API | Live PostgreSQL rollback path PASSED in CI; scoped idempotency policy BLOCKED DEC-07/11 |
 | P2-06 | Runtime controller discovery only; no invented taxonomy CRUD/API | BLOCKED DEC-01, DEC-06, DEC-07 |
 | P2-07 | Fail-closed config; no exposed sensitive routes; env-only DB credentials; redacted log allowlist; safe headers; no permissive CORS | Identity/RBAC/TLS topology, audit and rate-limit policy BLOCKED DEC-06/08 |
-| P2-08 | Structured allowlisted logs, server-generated request ID, distinct liveness/readiness, DB-dependent startup and shutdown | Unit HTTP checks; real startup/DB LOCAL_USER |
-| P2-09 | Alembic async metadata environment with no business revisions | Real clean DB/check/drift BLOCKED pending approved schema and local DB |
-| P2-10 | CI for Python compile, docs regression and independent tests; opt-in DB marker | GitHub Actions outcome must be checked after commit; local CI dependency installs unverified |
-| P2-11 | Non-root Dockerfile; local-only development Compose DB and API health dependency | Docker build/run LOCAL_USER; not executed in current runner |
+| P2-08 | Structured allowlisted logs, server-generated request ID, distinct liveness/readiness, DB-dependent startup and shutdown | Unit checks and real Docker startup/DB readiness PASSED in CI; Windows-local parity pending |
+| P2-09 | Alembic async metadata environment with no business revisions | Alembic current/upgrade head PASSED against disposable CI PostgreSQL with empty revision graph; business migration/drift BLOCKED by schema approval |
+| P2-10 | CI for Python compile, docs regression and independent tests; opt-in DB marker | GitHub Actions independent and integration jobs PASSED; dependency install and Phase 1 regression verified |
+| P2-11 | Non-root Dockerfile; local-only development Compose DB and API health dependency | Docker image build, compose start and API readiness PASSED in GitHub CI; Windows-local parity pending |
 | P2-12 | `docs/runbooks/phase2-local.md` with Windows PowerShell test and recovery commands | Documentation reviewed; local reproducibility needs owner evidence |
 
 ## Remaining externally owned decisions
@@ -47,3 +47,15 @@ The repository initially contained Phase 1 design docs, ADR-001..008, and `tools
 - `BLOCKED` means necessary policy/schema/data is not approved; no substitutes are permitted.
 - Local independent unit-test evidence (Python 3.13.5 with installed FastAPI 0.128.2, SQLAlchemy 2.0.50, Alembic 1.18.4): `python -m compileall -q src tests` EXIT 0; `python -m pytest -q -m 'not postgres'` **17 PASSED, 1 DESELECTED**. This does not include PostgreSQL, driver installation or actual lifespan startup. GitHub Actions status must be separately checked.
 - `PHASE_2_IMPLEMENTED_AWAITING_VERIFICATION` is the permitted marker for implemented independent foundations lacking real PostgreSQL, migrations, startup and Docker/CI evidence; the technical complete marker requires those verifications or separately tracked signed exceptions consistent with ADR-008.
+
+## Verified GitHub Actions evidence (2026-10-21)
+
+- **Source commit:** `2b4c258819182819777120ae530f5c398d3fc9f7`.
+- **Workflow:** [Phase 2 independent checks](https://github.com/Amirmahdimtz/text-classification-service/actions/runs/39597343384), conclusion **success**.
+- **Independent job — PASSED:** Python 3.13 dependency install including asyncpg 0.32.0; source/test compile; Phase 1 regression validator `PASS: 27 required files`; pytest `17 passed, 2 deselected`.
+- **Integration job — PASSED:** real PostgreSQL 17 started via Docker Compose, API Docker image built/non-root configured, `/health/live` and `/health/ready` returned HTTP 200; disposable `phase2_test` created; `pytest -q -m postgres`: `2 passed, 17 deselected`, including a live ASGI lifespan and rollback probe.
+- **Alembic — PASSED smoke execution:** `python -m alembic -c src/infrastructure/alembic/alembic.ini current` and `upgrade head` completed on the disposable database. The revision graph is deliberately **empty**; this proves CLI/config/DB connectivity, **not** approved schema migration, FK constraints, drift freedom or safe production rollback.
+- **Warnings:** Starlette `TestClient` emits a third-party AnyIO alias deprecation warning. The workflow also emitted Node.js deprecation warnings from existing action versions. No failed test was reported; lifecycle risk merits future dependency review.
+- **Security:** CI password generated dynamically per job (not stored in repository); Compose DB/API bind host loopback; confidential datasets/tokens were not introduced. Source and selected GitHub blobs scanned for high-risk key/token patterns; this does not replace a full supply-chain or penetration audit.
+- **Still NOT RUN:** Windows PowerShell local parity, production TLS/Vault integration, real approved migration and rollback drill, dependency vulnerability audit, tenant/RBAC/access checks (no approved protected endpoints), SLO/load.
+- **Still BLOCKED:** DEC-01..11 as described above; no model/classifier/evidence provider. Marker remains `PHASE_2_IMPLEMENTED_AWAITING_VERIFICATION` until remaining required verification/authorizations are addressed.

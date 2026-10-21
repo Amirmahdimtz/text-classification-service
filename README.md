@@ -2,7 +2,7 @@
 
 Production-grade, auditable classification of reports against an approved, versioned taxonomy, with evidence-grounded explanations.
 
-**Current project state:** PHASE_2_IMPLEMENTED_AWAITING_VERIFICATION. The repository now includes an executable FastAPI/DI/PostgreSQL foundation. Real DB, migration and Docker verification remain pending. No approved taxonomy, trained classifier, sensitive-data endpoint, or verified ML/service quality is claimed.
+**Current project state:** PHASE_2_IMPLEMENTED_AWAITING_VERIFICATION. The repository now includes an executable FastAPI/DI/PostgreSQL foundation. GitHub CI has now verified real isolated PostgreSQL connectivity, Docker/API startup and the Alembic empty-revision smoke path; approved business schemas and Windows-local verification remain pending. No approved taxonomy, trained classifier, sensitive-data endpoint, or verified ML/service quality is claimed.
 
 ## Architecture contract
 

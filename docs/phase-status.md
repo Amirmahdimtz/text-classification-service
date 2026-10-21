@@ -35,8 +35,10 @@ Phase 1 internal technical documentation gate is **PASSED**, with external/busin
 ## Phase 2 update — 2026-10-21
 
 - **Marker:** PHASE_2_IMPLEMENTED_AWAITING_VERIFICATION; the independent foundation is implemented, not verified for live PostgreSQL/Docker/Alembic.
-- **Evidence:** Python 3.13.5 local builder compile passed; independent tests 17 PASSED, 1 PostgreSQL deselected. This does not establish real DB or end-to-end startup success. CI GitHub status tracked separately.
+- **Evidence:** Python 3.13.5 local builder compile passed; 17 independent tests PASSED. GitHub Actions run 39597343384 PASSED: independent 17 tests, live PostgreSQL 2 tests, Docker build/start/health and Alembic empty-revision smoke. No approved business schema migration, security identity integration or Windows-local verification is claimed.
 - **Deliverables:** FastAPI Host/lifecycle, strict configuration, @inject auto-discovery, SQLAlchemy async infrastructure and bounded sessions, BaseRepository, transaction context, Alembic empty metadata environment, sanitized logs/correlation, health/readiness, CI, Docker, tests and PowerShell runbook.
 - **Blocked items:** physical taxonomy/report/results schema and revisions, business APIs, customer-specific auth/RBAC, scoped idempotency, data/retention/network approval (DEC-01..11). No fake model/provider/classification implemented.
 - **Detailed task matrix:** [Phase 2 execution ledger](phase-2-execution.md); [Windows verification commands](runbooks/phase2-local.md).
-- **Next:** Obtain LOCAL_USER real PostgreSQL, migration, Docker and startup evidence; resolve integration failures. No Phase 3 start implied.
+- **Next:** Obtain LOCAL_USER Windows parity evidence; external owner approvals are still required for schemas/AuthN/RBAC and production-sensitive functionality. No Phase 3 start implied.
+
+**Remote CI evidence (Phase 2):** [successful run 39597343384](https://github.com/Amirmahdimtz/text-classification-service/actions/runs/39597343384) on commit `2b4c258819182819777120ae530f5c398d3fc9f7`: 17 independent tests + 2 real PostgreSQL tests passed, Docker/API health and Alembic empty-graph checks succeeded. Status remains awaiting verification for unresolved customer-governed functionality and required environment-specific checks.
