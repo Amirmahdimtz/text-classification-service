@@ -59,3 +59,15 @@ The repository initially contained Phase 1 design docs, ADR-001..008, and `tools
 - **Security:** CI password generated dynamically per job (not stored in repository); Compose DB/API bind host loopback; confidential datasets/tokens were not introduced. Source and selected GitHub blobs scanned for high-risk key/token patterns; this does not replace a full supply-chain or penetration audit.
 - **Still NOT RUN:** Windows PowerShell local parity, production TLS/Vault integration, real approved migration and rollback drill, dependency vulnerability audit, tenant/RBAC/access checks (no approved protected endpoints), SLO/load.
 - **Still BLOCKED:** DEC-01..11 as described above; no model/classifier/evidence provider. Marker remains `PHASE_2_IMPLEMENTED_AWAITING_VERIFICATION` until remaining required verification/authorizations are addressed.
+
+## Latest verification — 2026-10-21 (supersedes earlier test counts)
+
+- **Implementation commit:** [`4541a172cee34801e8e385e4385e1d17c9708651`](https://github.com/Amirmahdimtz/text-classification-service/commit/4541a172cee34801e8e385e4385e1d17c9708651).
+- **GitHub Actions run:** [39597986175](https://github.com/Amirmahdimtz/text-classification-service/actions/runs/39597986175) — **completed / success** for both jobs.
+- **REMOTE/AVAILABLE independent:** dependency installation, compile and Phase 1 documentation regression **PASSED**; `pytest -q -m "not postgres"`: **20 passed, 3 deselected**. Host startup pass/fail unit tests use a test-scoped engine double and are not live DB evidence.
+- **REMOTE/AVAILABLE real integration:** Docker Compose created PostgreSQL 17 and built/ran the backend image; live health/readiness checks succeeded; `pytest -q -m postgres`: **3 passed, 20 deselected**. Verified bounded transaction/rollback, real FastAPI lifespan with DB and `BaseRepository` create/read/update/delete using a PostgreSQL TEMPORARY table; no employer data involved.
+- **REMOTE/AVAILABLE migration smoke:** Alembic `current` and `upgrade head` executed successfully on disposable PostgreSQL. Still **no approved migrations or business tables**: no claim of schema correctness, FK tests, revision rollback or drift verification.
+- **Security hardening:** production DSN now requires `ssl=verify-full` and malformed DSNs trigger sanitized configuration errors; regression tests added. Production IdP/RBAC, Vault/TLS topology, secrets governance, audit, risk acceptance and third-party vulnerability auditing remain **BLOCKED/NOT RUN**, with no sensitive API exposed.
+- **Warnings:** Starlette/AnyIO `TestClient` deprecation and GitHub Actions Node 20 deprecations are recorded as future dependency-maintenance risks; no test failure.
+- **LOCAL_USER:** Windows PowerShell installation, Docker/DB/health/Alembic parity and sanitized logs must still be executed or provided by owner (runbook). **SERVER_MODEL:** deferred to Phase 3+ under approved data/model/server; none run in Phase 2.
+- **Gate:** `PHASE_2_IMPLEMENTED_AWAITING_VERIFICATION` remains in force. No claim of Production Readiness or entry into Phase 3.

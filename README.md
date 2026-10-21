@@ -17,3 +17,5 @@ All API routes, schemas, roles, categories, thresholds and operational limits ma
 ## Phase 2 foundation
 
 See the [technical execution ledger](docs/phase-2-execution.md) and [Windows PowerShell runbook](docs/runbooks/phase2-local.md). Only `/health/live` and `/health/ready` are exposed. `DATABASE_URL` must be supplied via the environment; startup intentionally fails when the database is not available. All business schemas and sensitive endpoints remain blocked by approval-dependent contracts. Run `python -m pytest -q -m "not postgres"` for independent tests after installing `requirements-dev.txt`.
+
+**Latest CI evidence:** [Phase 2 run 39597986175](https://github.com/Amirmahdimtz/text-classification-service/actions/runs/39597986175): 20 independent tests and 3 real PostgreSQL integration tests passed; Docker startup and empty-revision Alembic commands passed. No customer schema, authentication policy, classifier or Production acceptance is implied. Production DB DSN configuration enforces `ssl=verify-full`.
