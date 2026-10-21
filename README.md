@@ -2,7 +2,7 @@
 
 Production-grade, auditable classification of reports against an approved, versioned taxonomy, with evidence-grounded explanations.
 
-**Current project state:** PHASE_2_IMPLEMENTED_AWAITING_VERIFICATION. The repository now includes an executable FastAPI/DI/PostgreSQL foundation. GitHub CI has now verified real isolated PostgreSQL connectivity, Docker/API startup and the Alembic empty-revision smoke path; approved business schemas and Windows-local verification remain pending. No approved taxonomy, trained classifier, sensitive-data endpoint, or verified ML/service quality is claimed.
+**Current project state:** PHASE_3_IMPLEMENTED_AWAITING_VERIFICATION. The repository now includes an executable FastAPI/DI/PostgreSQL foundation. GitHub CI has now verified real isolated PostgreSQL connectivity, Docker/API startup and the Alembic empty-revision smoke path; approved business schemas and Windows-local verification remain pending. Phase 3 independent Persian preprocessing, dataset audit, optional baseline trainer, artifact verifier and bounded ML provider exist. No approved taxonomy, real trained organizational classifier, sensitive-data endpoint, calibrated confidence or verified model quality is claimed.
 
 ## Architecture contract
 
@@ -19,3 +19,8 @@ All API routes, schemas, roles, categories, thresholds and operational limits ma
 See the [technical execution ledger](docs/phase-2-execution.md) and [Windows PowerShell runbook](docs/runbooks/phase2-local.md). Only `/health/live` and `/health/ready` are exposed. `DATABASE_URL` must be supplied via the environment; startup intentionally fails when the database is not available. All business schemas and sensitive endpoints remain blocked by approval-dependent contracts. Run `python -m pytest -q -m "not postgres"` for independent tests after installing `requirements-dev.txt`.
 
 **Latest CI evidence:** [Phase 2 run 39597986175](https://github.com/Amirmahdimtz/text-classification-service/actions/runs/39597986175): 20 independent tests and 3 real PostgreSQL integration tests passed; Docker startup and empty-revision Alembic commands passed. No customer schema, authentication policy, classifier or Production acceptance is implied. Production DB DSN configuration enforces `ssl=verify-full`.
+
+
+## Phase 3 — Offline ML groundwork only
+
+Read [execution/blocked ledger](docs/phase-3-execution.md), [private Windows audit](docs/runbooks/phase3-local.md), [approved-server model runbook](docs/runbooks/phase3-server.md) and [real benchmark status](docs/phase-3-benchmark-report.md). New offline ML dependencies are separately pinned in requirements-ml.txt, not added to the live API image. Model artifacts and any lawful/private datasets must never enter public git. Current marker is PHASE_3_IMPLEMENTED_AWAITING_VERIFICATION; previous technical Phase 2 gate remains valid and Phase 4 has NOT started.

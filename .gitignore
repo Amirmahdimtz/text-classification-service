@@ -9,3 +9,17 @@ __pycache__/
 *.db
 *.sqlite3
 *.log
+
+# Phase 3: private training corpora and derived ML weights must not enter public git
+*.jsonl
+*.parquet
+*.arrow
+*.safetensors
+*.onnx
+*.pt
+*.pth
+*.pkl
+*.joblib
+model_artifacts/
+private_data/
+dataset_artifacts/

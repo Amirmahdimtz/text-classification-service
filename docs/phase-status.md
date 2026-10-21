@@ -1,10 +1,10 @@
 # Phase status
 **Project:** text-classification-service
-**Current phase:** PHASE 2 — Production Foundation, Persistence & Security Baseline
-**Marker:** PHASE_2_COMPLETE_READY_FOR_PHASE_3
-**Previous verified marker:** PHASE_1_COMPLETE_READY_FOR_PHASE_2
+**Current phase:** PHASE 3 — Persian NLP, Dataset & Classification Engine
+**Marker:** PHASE_3_IMPLEMENTED_AWAITING_VERIFICATION
+**Previous verified marker:** PHASE_2_COMPLETE_READY_FOR_PHASE_3
 **Status as of:** 2026-10-21
-**Next phase:** NOT STARTED — Phase 3 needs a separate explicit user command; taxonomy, licensed data and model-evaluation inputs are still blocked
+**Next phase:** NOT STARTED — Phase 4 needs a separate explicit user command and Phase 3 real model/data gate verification
 **Documentation snapshot verified:** 0834bfe31be38a618981d1b814254b7282bb51d6 (GitHub main; 26 Phase 1 documents/tool files added after README initialization).
 
 ## Revised phase-gate decision (ADR-008)
@@ -52,3 +52,14 @@ Phase 1 internal technical documentation gate is **PASSED**, with external/busin
 - **Windows verification:** Owner-provided Python 3.12 evidence: independent 20/20 and live PostgreSQL 3/3, compile and Phase 1 docs validator passed; PostgreSQL 17 healthy on host port 55487, API alive/ready; Alembic CLI commands exited without error. The new configurable-port commit was verified in CI; a Windows pull/retest of that exact commit remains recommended.
 - **Hard limits:** Schema/physical migrations, customer AuthN/AuthZ, taxonomy endpoints, idempotency, retention, audit policy, vulnerability review, RBAC and production rollback are **NOT accepted**; see [the Phase 2 execution ledger](phase-2-execution.md) and DEC-01..11. Those changes require approved external inputs; no sensitive reports may be ingested. No server/model/Gold evaluation ran in Phase 2.
 - **Phase 3 dependency gate:** Actual training/benchmark requires approved taxonomy, legitimate representative annotated dataset and evaluation thresholds. This technical marker is **not** permission to fabricate inputs or begin Phase 3 without a fresh owner command. The employer's final acceptance remains Phase 6.
+
+
+## Phase 3 independent implementation — 2026-10-21
+
+- **Owner start command:** Explicitly authorized Phase 3 on 2026-10-21. Entry technical marker PHASE_2_COMPLETE_READY_FOR_PHASE_3 validated against main and successful phase2 CI run 39604867559.
+- **Marker:** PHASE_3_IMPLEMENTED_AWAITING_VERIFICATION. This is an implementation/partial-gate marker, not a completion or production claim.
+- **Independent code:** offset-preserving Persian text normalization, original segments, dataset group/time/exact/near-duplicate split auditing with private HMAC fingerprints, local authorized-only audit CLI, optional statistical TF-IDF + LinearSVC baseline training on TRAIN with VALIDATION reporting, portable JSON artifact/model loader with SHA-256 integrity and no pickle, explicit @inject Infrastructure inference provider with warmup, batch, timeout, readiness and graceful close. No public classifier HTTP route, unapproved DB model or migration was introduced.
+- **QA:** Python 3.13.5 development workspace 25 Phase 3 tests PASSED with optional scikit-learn 1.8.0; isolated fixture metrics are not model quality evidence. Existing GitHub CI includes Phase 1/2 regression and now a third offline ML job. Exact live run URL/outcome must be checked before claiming last commit green; see GitHub Actions.
+- **External gates:** DEC-01, DEC-02/03, DEC-04, DEC-05/09, DEC-08, DEC-10 remain BLOCKED. No employer-signed taxonomy/cardinality, authorized training/Gold/OOD data, calibrated probabilities, numerical targets, permitted model environment or real release. **Real baseline/encoder benchmark, Gold macro-F1, OOD, calibration, real inference/load and production rollback are NOT RUN.**
+- **Records:** [Phase 3 execution](phase-3-execution.md), [Private Windows audit](runbooks/phase3-local.md), [Server ML runbook](runbooks/phase3-server.md), [Artifact specification](model-artifact-manifest.md), [Benchmark status](phase-3-benchmark-report.md), [ADR-009](decisions/ADR-009-phase3-offline-artifacts-and-offsets.md).
+- **Gate:** Remain PHASE_3_IMPLEMENTED_AWAITING_VERIFICATION until all technical and model requirements receive genuine evidence. No permission to start Phase 4 without a separate explicit owner command. Employer's formal final acceptance remains Phase 6 per ADR-008.

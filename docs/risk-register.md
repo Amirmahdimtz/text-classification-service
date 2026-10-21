@@ -20,3 +20,13 @@
 | R-15 | Public repository leakage via fixtures or docs | High | Engineering + security | no real data, credential scan before publish; minimize examples | MITIGATED DESIGN, continuous |
 
 **Escalation:** Critical BLOCKED items prevent Phase 1 full acceptance or production-facing implementation. Deferral to later phases is documented dependency, never an implicit waiver. Risk owner and approval evidence must be recorded in phase-status and ADRs.
+
+
+## Phase 3 risk review (2026-10-21)
+
+- R-01/R-02/R-12/R-13/R-14: critical unresolved employer-controlled taxonomy, data rights, quality target, label cardinality and confidential-data policy. BLOCKED; owner employer/product/data-security.
+- R-03: code now clusters grouped reports and exact/candidate near duplicates and rechecks split disjointness; **residual semantic leakage risk HIGH**, expert case-level audit and Gold freeze BLOCKED; owner ML/data.
+- R-04/R-05: no observed length distribution or validated calibration; code preserves long text and does not invent confidence; real latency/threshold evidence BLOCKED; owner ML/ops.
+- R-07/R-15: derived model JSON vocabulary can expose sensitive character sequences; release and dataset must remain private; offline CLI forbids output under repo and Git ignore protects common private artifact types. Full authorized exfiltration audit remains BLOCKED.
+- R-08/R-09: artifact/evaluation SHA-256 and version checks, bounded warmup provider implemented; actual secure registry, signature, real load/performance, rollback BLOCKED; owner ops/security.
+- R-10: Phase 3 provider discovery and existing Phase 2 DI/CI regressions reviewed; future controller/production inference connection NOT IMPLEMENTED (depends on auth/API contract).
