@@ -1,0 +1,30 @@
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: phase2_dev
+      POSTGRES_USER: phase2
+      POSTGRES_PASSWORD: ${DEV_POSTGRES_PASSWORD:?Set a local, uncommitted database password}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U phase2 -d phase2_dev"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+  api:
+    build: .
+    environment:
+      ENV_TYPE: development
+      DATABASE_URL: ${COMPOSE_DATABASE_URL:?Set an uncommitted postgresql+asyncpg URL with db hostname}
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8000:8000"
+    restart: unless-stopped
+volumes:
+  postgres_dev_data:

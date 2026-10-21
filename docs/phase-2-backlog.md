@@ -1,5 +1,5 @@
-# Phase 2 backlog — planning only, NOT authorized to start
-**Entry gate:** PHASE_1_COMPLETE_READY_FOR_PHASE_2 based on internal technical verification (ADR-008) **plus a NEW explicit instruction to start Phase 2**. Employer approval is not required per phase; missing API/schema/security decisions block their dependent work items rather than independent foundation engineering. Accessible dev/test environment remains necessary for corresponding runtime/integration verification.
+# Phase 2 backlog — execution started 2026-10-21
+**Entry gate:** PHASE_1_COMPLETE_READY_FOR_PHASE_2 and explicit start instruction were both verified on 2026-10-21. See [execution ledger](phase-2-execution.md). Employer approval is not required per phase; missing API/schema/security decisions block their dependent work items rather than independent foundation engineering. Accessible dev/test environment remains necessary for corresponding runtime/integration verification.
 
 | Item | Deliverable | Dependency | Required verification |
 |---|---|---|---|
@@ -18,4 +18,4 @@
 
 **Dependency limits:** P2-04/P2-06 taxonomy-specific schema/API needs real taxonomy and approved cardinality. P2-07 must use least-privilege/fail-closed controls and cannot process real sensitive input before a sanctioned security/data policy. The minimum generic technical foundation (bootstrap/DI/config/tests) can proceed independently; no speculative production contracts.
 
-**Excluded:** fake classifier, trained model, real training/evaluation, grounded explanation engine, full production deployment, artificial passing tests. Model-heavy Phase 3+ tests must run on approved server/model environment, not user's laptop. Do not implement any of these tasks without explicit Phase 2 instruction.
+**Excluded:** fake classifier, trained model, real training/evaluation, grounded explanation engine, full production deployment, artificial passing tests. Model-heavy Phase 3+ tests must run on approved server/model environment, not user's laptop. Phase 2 was explicitly started by the owner; implementation/verification status is tracked in phase-2-execution.md.

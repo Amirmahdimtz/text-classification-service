@@ -2,7 +2,7 @@
 
 Production-grade, auditable classification of reports against an approved, versioned taxonomy, with evidence-grounded explanations.
 
-**Current project state:** Phase 1 — Requirements, Taxonomy & Detailed Design. This repository initially contains specifications only; no executable classification service, approved taxonomy, trained model, or verified service quality is claimed.
+**Current project state:** PHASE_2_IMPLEMENTED_AWAITING_VERIFICATION. The repository now includes an executable FastAPI/DI/PostgreSQL foundation. Real DB, migration and Docker verification remain pending. No approved taxonomy, trained classifier, sensitive-data endpoint, or verified ML/service quality is claimed.
 
 ## Architecture contract
 
@@ -13,3 +13,7 @@ Implementation must follow `Host → Application → Core → Infrastructure` an
 See [phase status](docs/phase-status.md), [requirements](docs/requirements.md), [taxonomy contract](docs/taxonomy-spec.md), [API contract proposal](docs/api-contract.md), [evaluation plan](docs/model-evaluation-plan.md), and [security threat model](docs/security-threat-model.md).
 
 All API routes, schemas, roles, categories, thresholds and operational limits marked **PROPOSED / TBD** require explicit owner approval before production implementation. Do not commit real sensitive reports, credentials, private datasets or large model artifacts to this public repository.
+
+## Phase 2 foundation
+
+See the [technical execution ledger](docs/phase-2-execution.md) and [Windows PowerShell runbook](docs/runbooks/phase2-local.md). Only `/health/live` and `/health/ready` are exposed. `DATABASE_URL` must be supplied via the environment; startup intentionally fails when the database is not available. All business schemas and sensitive endpoints remain blocked by approval-dependent contracts. Run `python -m pytest -q -m "not postgres"` for independent tests after installing `requirements-dev.txt`.

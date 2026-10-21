@@ -1,0 +1,10 @@
+app:
+  name: text-classification-service
+  version: 0.2.0-dev
+api:
+  prefix: /api/v1
+server:
+  host: 127.0.0.1
+  port: 8000
+vault:
+  enabled: false
