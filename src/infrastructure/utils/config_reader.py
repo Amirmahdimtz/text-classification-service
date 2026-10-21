@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from urllib.parse import urlsplit
+from urllib.parse import parse_qs, urlsplit
 
 import yaml
 
@@ -39,13 +39,18 @@ class ConfigReader:
         if self.get("vault.enabled") is not False:
             raise ConfigurationError("Vault backend is not configured; vault.enabled must be false")
         db_url = os.environ.get("DATABASE_URL", "")
-        parts = urlsplit(db_url)
-        if (parts.scheme != "postgresql+asyncpg" or not parts.hostname or not parts.path.strip("/")):
+        try:
+            parts = urlsplit(db_url)
+            hostname = parts.hostname
+        except ValueError:
+            raise ConfigurationError("DATABASE_URL is malformed") from None
+        if parts.scheme != "postgresql+asyncpg" or not hostname or not parts.path.strip("/"):
             raise ConfigurationError("DATABASE_URL must be a valid postgresql+asyncpg DSN from environment")
         if env == "production":
-            # TLS policy is stricter at deployment and must be verified on the real transport.
-            if "ssl=require" not in parts.query and "ssl=verify-full" not in parts.query:
-                raise ConfigurationError("Production DATABASE_URL requires TLS; configure an approved transport")
+            # Refuse TLS without server hostname/certificate verification.
+            ssl_modes = parse_qs(parts.query).get("ssl", [])
+            if ssl_modes != ["verify-full"]:
+                raise ConfigurationError("Production DATABASE_URL requires TLS ssl=verify-full")
         self.database_url = db_url
 
     def get(self, dotted_key: str):
