@@ -37,6 +37,7 @@ REQUIRED = (
     "docs/decisions/ADR-005-api-idempotency.md",
     "docs/decisions/ADR-006-persistence-transaction-audit.md",
     "docs/decisions/ADR-007-model-runtime-selection.md",
+    "docs/decisions/ADR-008-phase-acceptance-governance.md",
 )
 LINK_PATTERN = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
 SENSITIVE_PATTERNS = (
@@ -44,7 +45,7 @@ SENSITIVE_PATTERNS = (
     re.compile(r"\bAKIA[0-9A-Z]{16}\b"),
     re.compile(r"\bgh[pousr]_[A-Za-z0-9]{30,}\b"),
 )
-EXPECTED_MARKER = "PHASE_1_IMPLEMENTED_AWAITING_VERIFICATION"
+EXPECTED_MARKER = "PHASE_1_COMPLETE_READY_FOR_PHASE_2"
 
 
 def validate() -> list[str]:
@@ -76,7 +77,10 @@ def validate() -> list[str]:
     for name in REQUIRED:
         if name.startswith("docs/decisions/") and (ROOT / name).is_file():
             text = (ROOT / name).read_text(encoding="utf-8")
-            if "NOT APPROVED" not in text:
+            if name.endswith("ADR-008-phase-acceptance-governance.md"):
+                if "**Status:** ACCEPTED_BY_PROJECT_OWNER" not in text:
+                    errors.append(f"Phase acceptance ADR status invalid: {name}")
+            elif "NOT APPROVED" not in text:
                 errors.append(f"ADR lacks explicit unapproved state: {name}")
     return errors
 

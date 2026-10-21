@@ -1,8 +1,8 @@
 # P1-13 — Phase 1 acceptance and employer decision packet
-**Date:** 2026-10-21 | **Status:** REVIEW_PENDING — no signature, acceptance or authorization to start Phase 2 has been granted.
+**Date:** 2026-10-21 | **Status:** INTERNAL_TECHNICAL_GATE_PASSED / CUSTOMER_ACCEPTANCE_DEFERRED_TO_PHASE_6. Phase 2 is not started. See [ADR-008](decisions/ADR-008-phase-acceptance-governance.md).
 
 ## Task traceability
-| Task | Technical deliverable | Engineering status | Acceptance dependency |
+| Task | Technical deliverable | Engineering status | Deferred external input / downstream dependency |
 |---|---|---|---|
 | P1-01 | repository-assessment.md | DOCUMENTED | Confirm empty-repo baseline and initial Git state |
 | P1-02 | requirements.md RBAC | PROPOSED | Security/product must approve role and tenant scope |
@@ -16,7 +16,7 @@
 | P1-10 | quality-slo.md | DEFINED / TARGETS_BLOCKED | Numerical product, ops and ML thresholds |
 | P1-11 | data-governance.md, security-threat-model.md, ADR-003 | THREAT_MODEL_DOCUMENTED / APPROVAL_BLOCKED | Security and data privacy sign-off |
 | P1-12 | ADR-001..007, risk-register.md | DOCUMENTED / DECISIONS_PENDING | Formal ADR owner approvals |
-| P1-13 | this acceptance sheet | REVIEW_PACKET_PREPARED / SIGNOFF_BLOCKED | Employer/product owner written acceptance |
+| P1-13 | this acceptance sheet + ADR-008 | INTERNAL_TECHNICAL_REVIEW_PASSED | Employer acceptance deferred to Phase 6, not waived |
 
 ## Decisions requiring explicit response
 | ID | Owner | Choice/evidence needed | Impact of options |
@@ -32,23 +32,28 @@
 | DEC-09 | ML/product | Per-class F1, OOD/error cost, coverage/risk, calibration/explanation acceptance | No measurable quality release gate |
 | DEC-10 | Operations | Latency p95/p99, availability, RPS, hardware budget, RPO/RTO | No performance, reliability or recovery acceptance |
 | DEC-11 | Engineering/data owner | Schema ID types, uniqueness, audit retention, tenant scopes, migration policy | Phase 2 schema not approved |
-| DEC-12 | Employer/project owner | Review all Specs/ADRs, sign Phase 1 acceptance and authorize Phase 2 separately | Marker cannot be promoted |
+| DEC-12 | Employer/project owner | Formal employer sign-off only after full six-phase project; user explicitly starts each engineering phase | No customer sign-off at interim technical gates; final Production acceptance remains blocked until Phase 6 |
 
-## Definition of Done gates
-- [x] FR/NFR traceability with owner, priority, verification method and honest proposed/blocker status documented.
-- [ ] Approved initial taxonomy with real positive/negative cases and boundary rules — BLOCKED DEC-01.
-- [ ] Approved cardinality and review/out-of-scope policy — BLOCKED DEC-02/03.
-- [ ] Data samples, licensing and processing permissions recorded — BLOCKED DEC-04/08.
-- [ ] Signed API/DB/ML/Evaluation/Security spec review — BLOCKED DEC-06..11/12.
-- [x] Numerical quality and capacity targets explicitly marked TBD/BLOCKED, no invented measurements.
-- [x] Design architecture conforms to mandatory Guide; no speculative source/DB/model created.
-- [ ] Employer/product acceptance and review evidence — BLOCKED DEC-12.
+## Phase 1 technical Definition of Done — revised by ADR-008
+- [x] Actual GitHub main and 27-file documentation tree inspected; no source implementation falsely asserted.
+- [x] FR/NFR traceability includes owner, priority, verification method and explicit TBD/BLOCKED decisions.
+- [x] Taxonomy schema, examples/rule collection process and immutable versioning designed; actual approved categories explicitly deferred as dependent input.
+- [x] Single/multi-label alternatives and review/OOD semantics evaluated without fabricating a final customer decision.
+- [x] Data contract, annotation/gold protocol, API/DB/ML/security specifications and 7 design ADRs drafted; employer-facing values remain proposals.
+- [x] 12 explicit external decisions and dependent work restrictions tracked; Risk Register includes severity, owner, mitigation and state.
+- [x] All numeric targets and model/server verification left TBD/NOT RUN instead of fabricated; final customer acceptance reserved for Phase 6.
+- [x] Architecture consistent with mandatory guide; no fake providers or premature migration.
+- [x] Owner-reported clean git working tree and local docs validator PASS at commit 841256f480fda68c84c737dd291481ec88cb1a4a; GitHub verified matching HEAD.
+- [x] Project owner explicitly changed the *acceptance process* to interim technical gates and one final employer sign-off, recorded in ADR-008.
 
-## Formal sign-off template — NOT SIGNED
-Approver identity: NOT PROVIDED
-Decision record / date / artifact fingerprints: NOT PROVIDED
-Approved taxonomy_version: NOT PROVIDED
-Accepted API/security/evaluation targets: NOT PROVIDED
-Disposition: REVIEW_PENDING
+## Deferred decisions and safe work limits
+The decision worksheet above remains open; no external employer approval has been received. Phase 2 may **on a separate explicit start command** implement safe, testable Host, DI, Core/Infrastructure conventions, CI, config-validation, and DB groundwork that does not depend on unknown taxonomy and confidentiality settings. Before any taxonomy-specific persisted schema, customer-specific auth/tenancy behavior, final production API or real-data processing, obtain the required input/policy and revise the appropriate ADR. Training and validated model deployment require actual authorized data and resources in later phases. No unresolved security/data approval is waived.
 
-**Current Marker:** PHASE_1_IMPLEMENTED_AWAITING_VERIFICATION. Not PHASE_1_COMPLETE_READY_FOR_PHASE_2. Owner approvals are mandatory even if document lint passes. Any change requires logged revision and review; do not self-certify.
+## Formal employer acceptance — NOT PROVIDED (Phase 6)
+Employer authorized signatory: NOT PROVIDED
+Employer acceptance date/evidence: NOT PROVIDED
+Approved taxonomy and final numerical targets: NOT PROVIDED
+Disposition: DEFERRED_TO_FINAL_PROJECT_ACCEPTANCE
+
+**Current technical marker:** PHASE_1_COMPLETE_READY_FOR_PHASE_2.
+**Meaning:** Internally verified Phase 1 specification work, with honest deferred external decisions. Not production-ready and not approval of customer-sensitive contracts. Phase 2 remains NOT STARTED.

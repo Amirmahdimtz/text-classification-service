@@ -1,5 +1,5 @@
 # Phase 2 backlog — planning only, NOT authorized to start
-**Entry gate:** PHASE_1_COMPLETE_READY_FOR_PHASE_2, approved API and minimum schema, security baseline decision, accessible dev/test environment, plus NEW explicit instruction to start Phase 2.
+**Entry gate:** PHASE_1_COMPLETE_READY_FOR_PHASE_2 based on internal technical verification (ADR-008) **plus a NEW explicit instruction to start Phase 2**. Employer approval is not required per phase; missing API/schema/security decisions block their dependent work items rather than independent foundation engineering. Accessible dev/test environment remains necessary for corresponding runtime/integration verification.
 
 | Item | Deliverable | Dependency | Required verification |
 |---|---|---|---|
@@ -15,5 +15,7 @@
 | P2-10 | CI unit/import/static/security baseline | chosen runner/tools | recorded pipeline |
 | P2-11 | Container and API/DB environment parity | deployment resource choice | start/stop integration test |
 | P2-12 | Local ops, migration, recovery and secrets runbook | running environment | reproducible operator commands |
+
+**Dependency limits:** P2-04/P2-06 taxonomy-specific schema/API needs real taxonomy and approved cardinality. P2-07 must use least-privilege/fail-closed controls and cannot process real sensitive input before a sanctioned security/data policy. The minimum generic technical foundation (bootstrap/DI/config/tests) can proceed independently; no speculative production contracts.
 
 **Excluded:** fake classifier, trained model, real training/evaluation, grounded explanation engine, full production deployment, artificial passing tests. Model-heavy Phase 3+ tests must run on approved server/model environment, not user's laptop. Do not implement any of these tasks without explicit Phase 2 instruction.
