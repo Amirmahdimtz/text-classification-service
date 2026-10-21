@@ -32,6 +32,7 @@ class ArtifactManifest:
     dataset_fingerprint: str
     training_config_sha256: str
     evaluation_reference: str
+    evaluation_sha256: str
     dependency_version: str
     provenance_reference: str
     tokenizer_version: str | None
@@ -62,7 +63,7 @@ def load_verified_manifest(release_dir: Path, *, expected_taxonomy_version: str,
         required = ("manifest_version", "model_version", "model_identifier", "artifact_filename",
                     "artifact_sha256", "artifact_format", "preprocessor_version",
                     "taxonomy_version", "dataset_fingerprint", "training_config_sha256",
-                    "evaluation_reference", "dependency_version", "provenance_reference")
+                    "evaluation_reference", "evaluation_sha256", "dependency_version", "provenance_reference")
         if any(not isinstance(data.get(k), str) or not data[k].strip() for k in required):
             raise ArtifactValidationError("Manifest has missing required metadata")
         if data["manifest_version"] != "model-release-v1":
@@ -73,7 +74,7 @@ def load_verified_manifest(release_dir: Path, *, expected_taxonomy_version: str,
             raise ArtifactValidationError("Unapproved artifact format")
         if not _validate_release_name(data["artifact_filename"]) or data["artifact_filename"] == "manifest.json":
             raise ArtifactValidationError("Invalid artifact filename")
-        for key in ("artifact_sha256", "dataset_fingerprint", "training_config_sha256"):
+        for key in ("artifact_sha256", "dataset_fingerprint", "training_config_sha256", "evaluation_sha256"):
             if not _HEX_SHA256.fullmatch(data[key]):
                 raise ArtifactValidationError("Invalid fingerprint format")
         for key in ("tokenizer_version", "tokenizer_sha256", "decision_policy_version"):
@@ -95,6 +96,13 @@ def load_verified_manifest(release_dir: Path, *, expected_taxonomy_version: str,
                 digest.update(block)
         if digest.hexdigest() != data["artifact_sha256"]:
             raise ArtifactValidationError("Artifact integrity mismatch")
+        if not _validate_release_name(data["evaluation_reference"]):
+            raise ArtifactValidationError("Invalid evaluation report filename")
+        evaluation = root / data["evaluation_reference"]
+        if evaluation.is_symlink() or not evaluation.is_file() or evaluation.resolve(strict=True).parent != root or evaluation.stat().st_size > 8 * 1024 * 1024:
+            raise ArtifactValidationError("Evaluation report missing or unsafe")
+        if sha256(evaluation.read_bytes()).hexdigest() != data["evaluation_sha256"]:
+            raise ArtifactValidationError("Evaluation report integrity mismatch")
         return ArtifactManifest(**{k: data.get(k) for k in ArtifactManifest.__dataclass_fields__})
     except (OSError, ValueError, TypeError, UnicodeError) as exc:
         if isinstance(exc, ArtifactValidationError):

@@ -10,13 +10,15 @@ def _release(tmp_path):
     payload = b'{"format_version":"tfidf-linear-json-v1"}'  # Test-only, not a runnable model.
     (tmp_path / "classifier.json").write_bytes(payload)
     digest = sha256(payload).hexdigest()
+    (tmp_path / "validation-report.json").write_bytes(b"{}")
     manifest = {
         "manifest_version": "model-release-v1", "model_version": "test-model-1",
         "model_identifier": "test-only", "artifact_filename": "classifier.json",
         "artifact_sha256": digest, "artifact_format": "tfidf-linear-json-v1",
         "preprocessor_version": PREPROCESSOR_VERSION, "taxonomy_version": "test-tx-1",
         "dataset_fingerprint": digest, "training_config_sha256": digest,
-        "evaluation_reference": "local-test-only", "dependency_version": "sklearn-test",
+        "evaluation_reference": "validation-report.json",
+        "evaluation_sha256": sha256(b"{}").hexdigest(), "dependency_version": "sklearn-test",
         "provenance_reference": "test-fixture", "tokenizer_version": None,
         "tokenizer_sha256": None, "decision_policy_version": None,
     }

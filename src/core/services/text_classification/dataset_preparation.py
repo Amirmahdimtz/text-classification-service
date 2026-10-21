@@ -175,10 +175,23 @@ def build_private_manifest(splits: dict[str, tuple[DatasetRecord, ...]], *,
         "label_mode": label_mode, "seed": seed, "ratios": list(ratios), "temporal": temporal,
         "splits": {},
     }
+    seen_ids: set[str] = set()
+    seen_groups: set[str] = set()
+    seen_text: set[str] = set()
     for name in ("train", "validation", "test"):
         if not splits.get(name):
             raise DatasetValidationError("Required split is missing or empty")
         records = splits[name]
+        ids = {r.report_id for r in records}
+        groups = {r.group_id for r in records}
+        text_keys = {sha256(preprocess_text(r.text).normalized_text.encode("utf-8")).hexdigest() for r in records}
+        if seen_ids & ids or seen_groups & groups or seen_text & text_keys:
+            raise DatasetValidationError("Cross-split identifier, group or exact duplicate leakage")
+        if len(ids) != len(records):
+            raise DatasetValidationError("Duplicate identifier within a split")
+        seen_ids.update(ids)
+        seen_groups.update(groups)
+        seen_text.update(text_keys)
         canonical = json.dumps(sorted([
             [r.report_id, r.group_id, r.text, list(r.labels), r.occurred_at.isoformat() if r.occurred_at else None]
             for r in records
