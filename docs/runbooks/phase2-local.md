@@ -4,7 +4,7 @@
 
 ## Prerequisites and checkout
 
-Install Git, Python **3.13 x64**, Docker Desktop (for isolated PostgreSQL), and PowerShell. For a first checkout:
+Install Git, Docker Desktop (for isolated PostgreSQL), and PowerShell. Python **3.13 x64** is the CI reference; the owner also verified the current 23 Python tests on **Windows Python 3.12**. These environments are distinct and both results are recorded. For a first checkout:
 
 ```powershell
 git clone https://github.com/Amirmahdimtz/text-classification-service.git
@@ -23,7 +23,7 @@ git log -1 --format="%H %s"
 Create an isolated environment:
 
 ```powershell
-py -3.13 -m venv .venv
+py -3.12 -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
 .\.venv\Scripts\python.exe -m compileall -q src tests tools
 .\.venv\Scripts\python.exe tools/verify_phase1_docs.py
@@ -40,9 +40,11 @@ The Compose topology binds API and PostgreSQL **only to 127.0.0.1**; it is for a
 $secure = Read-Host "Choose disposable local PostgreSQL password" -AsSecureString
 $env:DEV_POSTGRES_PASSWORD = [System.Net.NetworkCredential]::new('', $secure).Password
 $escaped = [Uri]::EscapeDataString($env:DEV_POSTGRES_PASSWORD)
+$env:POSTGRES_HOST_PORT = "55487" # Windows default; choose a free, non-excluded port if necessary
 $env:COMPOSE_DATABASE_URL = "postgresql+asyncpg://phase2:${escaped}@db:5432/phase2_dev"
-$env:DATABASE_URL = "postgresql+asyncpg://phase2:${escaped}@127.0.0.1:5432/phase2_dev"
+$env:DATABASE_URL = "postgresql+asyncpg://phase2:${escaped}@127.0.0.1:$($env:POSTGRES_HOST_PORT)/phase2_dev"
 $env:ENV_TYPE = "development"
+docker compose config --quiet
 docker compose up -d --build
 docker compose ps
 Invoke-RestMethod http://127.0.0.1:8000/health/live
@@ -54,8 +56,10 @@ Expected: both endpoints return `{ "status": "alive" }` and `{ "status": "ready"
 **Integration database creation (new, isolated database only):**
 
 ```powershell
-docker compose exec -T db psql -U phase2 -d phase2_dev -c "CREATE DATABASE phase2_test"
-$env:TEST_DATABASE_URL = "postgresql+asyncpg://phase2:${escaped}@127.0.0.1:5432/phase2_test"
+$existing = docker compose exec -T db psql -U phase2 -d phase2_dev -tAc "SELECT 1 FROM pg_database WHERE datname='phase2_test'"
+if ($LASTEXITCODE -ne 0) { throw "Cannot check the isolated test database" }
+if (-not $existing) { docker compose exec -T db psql -U phase2 -d phase2_dev -c "CREATE DATABASE phase2_test" }
+$env:TEST_DATABASE_URL = "postgresql+asyncpg://phase2:${escaped}@127.0.0.1:$($env:POSTGRES_HOST_PORT)/phase2_test"
 .\.venv\Scripts\python.exe -m pytest -q -m postgres
 ```
 
@@ -72,6 +76,8 @@ $env:DATABASE_URL = $env:TEST_DATABASE_URL
 ```
 
 Do this only on disposable `phase2_test`, not business/production DB. The actual `upgrade head` may create the Alembic version bookkeeping table; it is NOT a production schema migration. Do not run `stamp`, `revision --autogenerate`, downgrade, drop, delete volumes or reset a database without a reviewed migration and explicit approval. The future migration strategy: review models/metadata → create forward revision on isolated DB → `upgrade head` → drift check → recovery/backup plan → approved deployment. Rollback for data-bearing migrations needs an explicit safety review; no automatic destructive rollback is provided.
+
+**Port rule:** `POSTGRES_HOST_PORT` only changes the published Windows/PostgreSQL port; the API container must continue connecting to `db:5432` via `COMPOSE_DATABASE_URL`. Do not run `docker compose config` without `--quiet` when sharing output, as resolved environment values may contain a database password. Default in Compose is `55487`; GitHub CI uses the same parameter and checks the published port.
 
 ## Failure diagnosis and evidence to send
 
