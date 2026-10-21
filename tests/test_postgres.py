@@ -32,3 +32,20 @@ async def test_postgres_sessions_transactions_and_rollback(monkeypatch):
             assert value is None
     finally:
         await db.close_async()
+
+
+@pytest.mark.postgres
+def test_real_fastapi_lifespan_with_postgresql(monkeypatch):
+    """Only live database integration: not a unit-test double."""
+    from fastapi.testclient import TestClient
+    from src.host.app import create_app
+
+    url = os.getenv("TEST_DATABASE_URL", "")
+    if not url:
+        pytest.skip("TEST_DATABASE_URL not configured")
+    assert url.startswith("postgresql+asyncpg://") and url.split("?", 1)[0].endswith("_test")
+    monkeypatch.setenv("DATABASE_URL", url)
+    with TestClient(create_app()) as client:
+        assert client.get("/health/live").status_code == 200
+        ready = client.get("/health/ready")
+        assert ready.status_code == 200 and ready.json() == {"status": "ready"}

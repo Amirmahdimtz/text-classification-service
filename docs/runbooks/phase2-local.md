@@ -59,7 +59,7 @@ $env:TEST_DATABASE_URL = "postgresql+asyncpg://phase2:${escaped}@127.0.0.1:5432/
 .\.venv\Scripts\python.exe -m pytest -q -m postgres
 ```
 
-Expected: `1 passed` when the isolated PostgreSQL database is reachable; the test checks real session, transaction commit and rollback of a temporary-table creation. It does **not** prove production schema FKs, idempotency, or approved business transactions.
+Expected: `2 passed` when the isolated PostgreSQL database is reachable; the test checks real session, transaction commit and rollback of a temporary-table creation. It does **not** prove production schema FKs, idempotency, or approved business transactions.
 
 ## Alembic groundwork
 
