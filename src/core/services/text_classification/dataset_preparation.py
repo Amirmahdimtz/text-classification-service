@@ -198,10 +198,28 @@ def build_private_manifest(splits: dict[str, tuple[DatasetRecord, ...]], *,
         ]), ensure_ascii=False, separators=(",", ":")).encode("utf-8")
         fingerprint = hmac.new(fingerprint_key, canonical, "sha256").hexdigest()
         counts = Counter(label for record in records for label in record.labels)
+        char_lengths = sorted(len(r.text) for r in records)
+        token_lengths = sorted(len(r.text.split()) for r in records)
+        script_counts: Counter[str] = Counter()
+        for record in records:
+            has_persian = bool(re.search(r"[\u0600-\u06FF]", record.text))
+            has_latin = bool(re.search(r"[A-Za-z]", record.text))
+            script_counts["mixed" if has_persian and has_latin else
+                          "persian_or_arabic" if has_persian else
+                          "latin" if has_latin else "other"] += 1
+
+        def percentile(numbers: list[int], fraction: float) -> int:
+            return numbers[max(0, math.ceil(len(numbers) * fraction) - 1)]
+
         manifest["splits"][name] = {
             "count": len(records), "label_counts": dict(sorted(counts.items())),
             "min_codepoints": min(len(r.text) for r in records),
-            "max_codepoints": max(len(r.text) for r in records),
+            "max_codepoints": char_lengths[-1],
+            "p50_codepoints": percentile(char_lengths, 0.50),
+            "p95_codepoints": percentile(char_lengths, 0.95),
+            "p50_whitespace_tokens": percentile(token_lengths, 0.50),
+            "p95_whitespace_tokens": percentile(token_lengths, 0.95),
+            "script_counts_heuristic": dict(sorted(script_counts.items())),
             "hmac_sha256": fingerprint,
         }
     return manifest

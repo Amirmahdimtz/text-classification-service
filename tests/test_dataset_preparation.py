@@ -75,6 +75,9 @@ def test_manifest_hmac_counts_without_report_text_or_ids():
     manifest = build_private_manifest(splits, **kwargs)
     assert manifest == build_private_manifest(splits, **kwargs)
     assert manifest["splits"]["test"]["count"] > 0
+    assert manifest["splits"]["train"]["p95_codepoints"] > 0
+    assert manifest["splits"]["train"]["p50_whitespace_tokens"] >= 1
+    assert manifest["splits"]["train"]["script_counts_heuristic"]["latin"] > 0
     assert "Unrelated subject" not in str(manifest)
     with pytest.raises(DatasetValidationError):
         build_private_manifest(splits, **{**kwargs, "fingerprint_key": b"weak"})
