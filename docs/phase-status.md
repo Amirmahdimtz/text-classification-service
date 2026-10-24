@@ -1,12 +1,13 @@
 # Phase status
 **Project:** text-classification-service
-**Current phase:** PHASE 4 — Grounded Explanation, Decision Policy & Human Review
-**Marker:** PHASE_4_IMPLEMENTED_AWAITING_VERIFICATION
+**Current phase:** PHASE 5 — End-to-End Integration, Quality & Resilience (independent scope only)
+**Marker:** PHASE_5_IMPLEMENTED_AWAITING_VERIFICATION
+**Previous Phase 4 marker (unchanged):** PHASE_4_IMPLEMENTED_AWAITING_VERIFICATION
 **Previous Phase 3 marker (unchanged):** PHASE_3_IMPLEMENTED_AWAITING_VERIFICATION
 **Previous verified marker:** PHASE_2_COMPLETE_READY_FOR_PHASE_3
 **Status as of:** 2026-10-24
-**Progression Authorization:** `CONDITIONAL_PROGRESSION_APPROVED` for the independent Phase 4 entry only (ADR-010); explicit owner Phase 4 start received on 2026-10-24; **NOT** authorization for Phase 5.
-**Next phase:** Phase 5 NOT STARTED; requires a separate owner command and independently justified, recorded progression gate. Real model verification remains deferred to Phase 6.
+**Progression Authorization:** `CONDITIONAL_PROGRESSION_APPROVED` for independent Phase 5 entry only ([ADR-013](decisions/ADR-013-phase5-conditional-entry-authorization.md)); explicit owner Phase 5 start received on 2026-10-24; **NOT** authorization for Phase 6.
+**Next phase:** Phase 6 NOT STARTED; a new, separately evidenced progression gate and explicit owner command are required. Real model verification remains deferred to Phase 6.
 **Documentation snapshot verified:** 0834bfe31be38a618981d1b814254b7282bb51d6 (GitHub main; 26 Phase 1 documents/tool files added after README initialization).
 
 ## Revised phase-gate decision (ADR-008)
@@ -161,4 +162,15 @@ The prior Phase 3 verification debt remains open as documented above; local synt
 **Unclosed carried verification debt (unchanged):** P3-01/03 authorized data/leakage BLOCKED; P3-04..08 real baseline/encoder/OOD/calibration DEFERRED/NOT RUN; P3-09..12 real artifact/model readiness, benchmark and rollback DEFERRED/NOT RUN; P4-02/04/05/10 actual taxonomy-grounded explanation and decision-policy evaluation BLOCKED/DEFERRED; P4-07..09 reviewer AuthN/AuthZ/concurrency/atomic audit/feedback permission BLOCKED; P5-08/09/10 real model-integrated E2E/Gold/load NOT RUN and Phase 5 not started. Existing [risk owners and restrictions](risk-register.md) remain; none is considered PASSED by synthetic tests.
 
 **Required sequence:** (1) independent explicit `فاز ۵ را شروع کن`; (2) implement/test ADR-013 allowed scope and record Phase 5 actual results; (3) obtain a valid complete Phase 5 gate or separately justified `CONDITIONAL_PROGRESSION_APPROVED` for a named, safe Phase 6 scope with CI/DB/security evidence, owner and debt ledger; (4) re-audit Phase 6 entry before implementation. Critical employer-owned contracts and real data/model/server approvals remain mandatory for dependent work and final Production Readiness.
+
+
+## Phase 5 independent-scope implementation and verification — 2026-10-24
+
+- **Start command:** Owner explicitly instructed `فاز ۵ را شروع کن`; entry source `4c90b1d125bd09117a0cb13c81b160b49cda3a1a` (actual main after Phase 6 rejected-entry governance audit). ADR-013's previously recorded conditional technical authorization is now exercised **only for its listed safe subscopes**. Earlier Phase 6 attempted entry and rejection remain historical evidence; neither represents Phase 6 implementation.
+- **Marker:** `PHASE_5_IMPLEMENTED_AWAITING_VERIFICATION` (partial dependency-independent engineering work, **not full Phase 5 DoD**). Preserve both `PHASE_4_IMPLEMENTED_AWAITING_VERIFICATION` and `PHASE_3_IMPLEMENTED_AWAITING_VERIFICATION`. No Phase 6 progression authorization is issued by this entry.
+- **Implementation and tests:** Host readiness maps unexpected PostgreSQL ping exceptions to redacted 503, without confusing database outage with category `OUT_OF_SCOPE`; middleware resets request correlation context even if processing aborts. Test-only API probes verify unchanged health/header/error contracts, 404 on unapproved routes, and missing model release remains fail-closed. Live isolated PostgreSQL regression uses a refused localhost connection and separately verifies healthy test DB connectivity without stopping any server.
+- **Evidence:** [Source commit 4c90b1d](https://github.com/Amirmahdimtz/text-classification-service/commit/4c90b1d125bd09117a0cb13c81b160b49cda3a1a), [GitHub Actions run 40097255880](https://github.com/Amirmahdimtz/text-classification-service/actions/runs/40097255880) **SUCCESS** all four jobs: independent 80 PASSED / 1 optional SKIPPED / 4 DESELECTED; offline ML 27 PASSED (overlapping tests); live isolated PostgreSQL 4 PASSED / 1 optional SKIPPED / 80 DESELECTED, Docker/API health and Alembic empty-graph smoke; dependency-security `pip check` and OSV audit both PASSED (`No known vulnerabilities found` at scan time). Pre-existing Starlette/httpx and AnyIO deprecation warnings remain non-security compatibility debt; avoid introducing new pytest collection warnings.
+- **Blockers and verification debt:** P5-02/03/04/05, customer-specific P5-06/07, reviewer integration P5-08, Gold model P5-09 and actual model capacity P5-10 remain BLOCKED or DEFERRED. P5-11 tests do **not** prove actual business idempotency, reviewer concurrency or partial-commit guarantees without approved schema/AuthN. Previous P3/P4 server/Gold/semantics debt is unchanged and requires real data/model/security approval. Risk owners and by-Phase-6 acceptance checkpoint remain in [risk register](risk-register.md).
+- **Scope / operational limits:** Existing `/health/ready` indicates API/DB only, **not model-loaded readiness**; `/health/live` is liveness only. No public classification/review Controller, business tables, new Migration, approved taxonomy, secured ML Release, Gold benchmark, sensitive-report processing or Production deployment. Full detail: [Phase 5 execution ledger](phase-5-execution.md), [Windows/isolated PostgreSQL runbook](runbooks/phase5-local.md).
+- **Next gate:** At most an independently justified, separately recorded `CONDITIONAL_PROGRESSION_APPROVED` for a clearly safe Phase 6 task could follow a fresh scope/security/CI audit and owner decision. No automatic entry or `PHASE_5_COMPLETE_READY_FOR_PHASE_6`; all final Phase 5 model/reviewer/actual E2E acceptance conditions are open.
 

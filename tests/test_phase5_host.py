@@ -17,7 +17,7 @@ from src.infrastructure.text_classifier_provider import (
 )
 
 
-class TestEngine:
+class FakeEngine:
     def __init__(self):
         self.disposed = False
 
@@ -50,7 +50,7 @@ async def test_existing_http_contract_and_unapproved_routes_remain_closed():
 
 
 def test_readiness_failures_and_recovery_are_503_not_500(monkeypatch):
-    engine = TestEngine()
+    engine = FakeEngine()
     monkeypatch.setattr(db_module, "create_async_engine", lambda *a, **kw: engine)
     observations = iter((True, False, OSError("PRIVATE_DB_HOST"), True))
 
