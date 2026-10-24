@@ -21,3 +21,8 @@ The only new runtime code is an internal, pure, convention-discovered Core Servi
 
 **Phase Marker:** `PHASE_5_IMPLEMENTED_AWAITING_VERIFICATION` unchanged.
 **Progression:** `CONDITIONAL_PROGRESSION_APPROVED` remains only the narrow independent Phase 6 scope already authorized by ADR-014. **Phase 6 NOT STARTED.**
+
+
+## Additional approved independent technical invariant — 2026-10-24
+
+To avoid silently treating mutable organizational category drafts as safe releases, `TaxonomyService.assess_revision` now returns a deterministic immutable `TaxonomyRevisionImpact` (added/deactivated/redefined IDs and mandatory model revalidation) and fails on a missing historical ID, invalid parent, new active category or reactivation without a governed approval path. This is an additive independent invariant, **not** an employer approval of publish rights, category semantics or a physical schema. Only adjacent snapshots are comparable without a durable historical registry; global ID reuse, split/merge mapping, approval trail and actual release promotion remain BLOCKED. [Code 4908ca18](https://github.com/Amirmahdimtz/text-classification-service/commit/4908ca1862f9417dc316e995b2770c1212febc24) and [CI #40107406832](https://github.com/Amirmahdimtz/text-classification-service/actions/runs/40107406832) verified independent structural checks. Phase 5 Marker and Phase 6 conditional-only authorization **unchanged**.

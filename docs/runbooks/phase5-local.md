@@ -152,3 +152,21 @@ $py = ".\.venv\Scripts\python.exe"
 ```
 
 [CI 40105875237](https://github.com/Amirmahdimtz/text-classification-service/actions/runs/40105875237) independently passed the new tests and existing PostgreSQL/ML/security jobs. Targeted taxonomy tests overlap the independent count. Latest local Windows retest NOT RUN. The new Core service is **draft-only**: no administrative HTTP route, approved database model, Migration or release publish operation exists; do not substitute it for real organization-managed production taxonomy. Authorization/retention/schema and real model/version transition tests remain BLOCKED/DEFERRED.
+
+
+## Latest Phase 5 dynamic-taxonomy revision regression — 2026-10-24
+
+The internal Core `TaxonomyService.assess_revision` now checks safe structural transitions between adjacent dynamic category drafts. [Commit 4908ca18](https://github.com/Amirmahdimtz/text-classification-service/commit/4908ca1862f9417dc316e995b2770c1212febc24) passed [CI #40107406832](https://github.com/Amirmahdimtz/text-classification-service/actions/runs/40107406832) on the exact source SHA. **Local Windows testing on this latest SHA is NOT RUN**.
+
+From the actual checked-out project root, inspect `git status --short` and preserve local changes before `git switch main` and `git pull --ff-only origin main`. Using the existing verified Windows venv:
+
+```powershell
+$py = ".\.venv\Scripts\python.exe"
+& $py -m compileall -q src tests tools
+& $py -m pytest -q tests/test_taxonomy_drafts.py
+& $py -m pytest -q -m "not postgres"
+# Only with the preconfigured disposable *_test PostgreSQL database:
+& $py -m pytest -q -rs -m postgres
+```
+
+Report SHA and sanitized command results only; never return DSNs, passwords or report data. Taxonomy-focused tests overlap the independent suite and do not prove real model compatibility, secure category administrator CRUD or publication. All customer-owned runtime/model/security gates remain in [Phase 5 acceptance inputs](../phase-5-acceptance-inputs.md).
