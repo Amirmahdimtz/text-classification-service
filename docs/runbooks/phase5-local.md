@@ -109,3 +109,18 @@ Owner completed post-audit checks on the correct repository at `684bbbdf88f959f8
 ## Phase 5 explicit completion request — final bounded closeout assessment (2026-10-24)
 
 A newer provider concurrency guard was committed at [source 28afaefb](https://github.com/Amirmahdimtz/text-classification-service/commit/28afaefbbd33ab05fcacba37a1c35ca316d1b47e) with [CI 40102628553](https://github.com/Amirmahdimtz/text-classification-service/actions/runs/40102628553) SUCCESS. **Owner Windows post-fix test NOT RUN for this new SHA** (previous Windows run was on `684bbbdf`). When testing the updated checked-out `main` with no uncommitted changes and the same isolated `*_test` PostgreSQL, run existing regression commands earlier in this file. Expected functionality: `InferenceUnavailableError` and no leaked semaphore permit if shutdown races a capacity wait. This does not test a real model or authorize a business API. Required external approval and full completion blockers are itemized in [Phase 5 closure audit](../phase-5-closure-audit.md).
+
+## Engineering-owned Phase 5 backlog follow-up — 2026-10-24
+
+New source [2ac58f4](https://github.com/Amirmahdimtz/text-classification-service/commit/2ac58f419752f52540d146ef5b1126abc68c5) adds a negative Host/DI configuration regression and a real isolated PostgreSQL synthetic two-write atomicity test. [CI 40103494346](https://github.com/Amirmahdimtz/text-classification-service/actions/runs/40103494346) PASSED with 86 independent/5 PostgreSQL, plus separately run optional offline ML. To verify locally against the latest source, first inspect and preserve uncommitted work, then fast-forward `main` as already shown above and use:
+
+```powershell
+$py = ".\.venv\Scripts\python.exe"
+& $py -m compileall -q src tests tools
+& $py -m pytest -q tests/test_phase5_host.py
+& $py -m pytest -q -m "not postgres"
+# Only when TEST_DATABASE_URL privately points to the disposable *_test database:
+& $py -m pytest -q -rs -m postgres
+```
+
+The new DB test uses **only a temporary table** in the isolated test DB and discards it; it does not create business tables, run a migration, alter or remove customer records. The targeted Host tests are included in the independent suite and should not be added again to totals. Report only sanitized SHA/test counts and exit codes; never share `TEST_DATABASE_URL`, data, model or secrets. Windows local tests for this exact SHA have not been reported and are **NOT RUN**.
