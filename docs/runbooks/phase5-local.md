@@ -124,3 +124,18 @@ $py = ".\.venv\Scripts\python.exe"
 ```
 
 The new DB test uses **only a temporary table** in the isolated test DB and discards it; it does not create business tables, run a migration, alter or remove customer records. The targeted Host tests are included in the independent suite and should not be added again to totals. Report only sanitized SHA/test counts and exit codes; never share `TEST_DATABASE_URL`, data, model or secrets. Windows local tests for this exact SHA have not been reported and are **NOT RUN**.
+
+## Phase 5 owner final-completion demand — verified independent scope, hard DoD boundary (2026-10-24)
+
+The P5-06 provider now uses one total timeout for capacity wait plus inference. See [source 79062be3](https://github.com/Amirmahdimtz/text-classification-service/commit/79062be3bcfb5a1a95a870642abac432ae7a91db), [CI 40104414514](https://github.com/Amirmahdimtz/text-classification-service/actions/runs/40104414514) SUCCESS. The user's older Windows results do not validate this newest source SHA; latest-code LOCAL_USER **NOT RUN**. In the verified repo root, after preserving local changes and safely fast-forwarding main (instructions above), use the existing `$py` to run:
+
+```powershell
+$py = ".\.venv\Scripts\python.exe"
+& $py -m compileall -q src tests tools
+& $py -m pytest -q tests/test_text_classifier_provider.py tests/test_phase5_host.py
+& $py -m pytest -q -m "not postgres"
+# Only with authorized TEST_DATABASE_URL pointing to the isolated *_test database:
+& $py -m pytest -q -rs -m postgres
+```
+
+These tests require no confidential reports, real Gold or GPU, and targeted tests overlap the independent group. Do not send DSN/passwords. Actual model/authorized reviewer/API/Gold and capacity verification cannot be done using this synthetic test environment. See [real acceptance evidence prerequisites](../phase-5-acceptance-inputs.md).
