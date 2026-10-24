@@ -132,3 +132,33 @@ The prior Phase 3 verification debt remains open as documented above; local synt
 - **Blocked production-facing Phase 5 work:** P5-02 final classification DTO/schema and public inference routes; P5-03/04 atomic business persistence and idempotency; P5-05 record-scoped AuthN/AuthZ; P5-06 business/tenant rate-limit thresholds; P5-07 new external OpenAPI v1 classification contract; P5-08 real API+model+review E2E, pending signed taxonomy/cardinality/API/schema/identity/privacy/reviewer rules and lawful release inputs. No fake production provider, labels, thresholds, reviewer or storage contracts.
 - **Deferred model/server verification, deadline Phase 6:** P5-08 real integrated inference/review E2E, P5-09 Gold/Explanation/Decision/version regression, model-dependent P5-10 latency/load; carried P3/P4 real data/leakage/Gold/OOD/calibration, groundedness and reviewer concurrence/audit. Owners: Employer/Product/Taxonomy (label, API, threshold); Security/Review Owner/Data Governance (AuthN/AuthZ, retention, approval and access); ML/Data Owner (authorized train/Gold/OOD, model release/calibration); Engineering/Ops (DB transaction, concurrency, runtime, load, rollback). Genuine evidence, tests and employer Phase 6 acceptance required. See [risk register](risk-register.md) and [Phase 4 ledger](phase-4-execution.md).
 - **Safety:** no approval for data processing, business-model schema, public classifier API, category decisions, publication or production readiness. A separate, explicit `فاز ۵ را شروع کن` command is mandatory before any Phase 5 implementation.
+
+## Phase 6 start-request audit — 2026-10-24 (ENTRY GATE BLOCKED; PHASE 6 NOT STARTED)
+
+- **Owner instruction:** Explicit request to start Phase 6 received, but this does not override the required Phase 5 entry and completion/progression gates.
+- **Audited GitHub main:** `8f4f73c9d364190cc3ad7d591ed3f9ea74b60863`. [CI run 40094823018](https://github.com/Amirmahdimtz/text-classification-service/actions/runs/40094823018) SUCCESS: independent 76 PASSED / 1 SKIPPED / 3 DESELECTED; offline ML 27 PASSED (overlapping tests); isolated PostgreSQL 3 PASSED / 1 SKIPPED / 76 DESELECTED, Docker/API/Alembic smoke passed; dependency-security OSV and pip compatibility jobs passed. These are existing software/CI checks, not Phase 6 acceptance evidence.
+- **Formal phase markers unchanged:** `PHASE_4_IMPLEMENTED_AWAITING_VERIFICATION`; `PHASE_3_IMPLEMENTED_AWAITING_VERIFICATION`; last full technical gate `PHASE_2_COMPLETE_READY_FOR_PHASE_3`. **Phase 5 NOT STARTED. Phase 6 NOT STARTED.**
+- **Authorization boundary:** [ADR-013](decisions/ADR-013-phase5-conditional-entry-authorization.md) grants `CONDITIONAL_PROGRESSION_APPROVED` only for its explicitly limited independent Phase 5 scope **after** a separate Phase 5 start command. No Phase 5 implementation marker, Phase 5 completion marker or scoped authorization for Phase 6 exists.
+- **Repository findings:** No Phase 5 execution document, business classification/review Controller, approved business SQLAlchemy models/Alembic version migrations, or authorized serving model release. Current `/health/ready` verifies DB only. Remote audit cannot verify local uncommitted changes.
+- **Consequence:** Only read-only audit and recording the failed entry gate in existing governance documents are performed. **No P6 implementation, model evaluation, local/GPU test, release, deployment, production change, UAT, or acceptance marker was undertaken.** Unapproved sensitive data must not be processed.
+
+| Phase 6 task | Current status / test | Specific prerequisite (in addition to a valid Phase 5 gate) | Risk owner |
+|---|---|---|---|
+| P6-01 | BLOCKED (entry gate); technical test NOT RUN | Release provenance, approved artifact/model/taxonomy | Engineering / ML / operations |
+| P6-02 | BLOCKED (entry gate); technical test NOT RUN | Approved production privacy, secrets, network policy | Security / operations |
+| P6-03 | BLOCKED (entry gate); technical test NOT RUN | Release promotion, approval, rollback environment | Engineering / operations |
+| P6-04 | BLOCKED (entry gate); technical test NOT RUN | Actual integrated and validated model readiness | Engineering / ML / operations |
+| P6-05 | BLOCKED (entry gate); technical test NOT RUN | SERVER_MODEL: authorized representative workload, SLO, compute | ML / operations |
+| P6-06 | BLOCKED (entry gate); technical test NOT RUN | Reviewer/record AuthZ contract and formal security review | Security / engineering |
+| P6-07 | BLOCKED (entry gate); technical test NOT RUN | Approved isolated recovery environment, RPO/RTO and backups | Operations / data owner |
+| P6-08 | BLOCKED (entry gate); technical test NOT RUN | Real runtime observability, approved SLO and on-call owner | Operations |
+| P6-09 | BLOCKED (entry gate); technical test NOT RUN | Authorized drift reference data and review thresholds | ML / data owner |
+| P6-10 | BLOCKED (entry gate); technical test NOT RUN | SERVER_MODEL: lawful independent Gold/OOD and signed taxonomy/quality targets | Employer / data owner / ML |
+| P6-11 | BLOCKED (entry gate); technical test NOT RUN | Approved customer UAT scenarios, permissions and working E2E | Employer / product / reviewers |
+| P6-12 | BLOCKED (entry gate); technical test NOT RUN | Verified Phase 5 integration and actual deployment/model/recovery evidence | Engineering / operations |
+| P6-13 | BLOCKED (entry gate); technical test NOT RUN | Closed security/ML/operations evidence and formal employer acceptance | Employer / operations / security |
+
+**Unclosed carried verification debt (unchanged):** P3-01/03 authorized data/leakage BLOCKED; P3-04..08 real baseline/encoder/OOD/calibration DEFERRED/NOT RUN; P3-09..12 real artifact/model readiness, benchmark and rollback DEFERRED/NOT RUN; P4-02/04/05/10 actual taxonomy-grounded explanation and decision-policy evaluation BLOCKED/DEFERRED; P4-07..09 reviewer AuthN/AuthZ/concurrency/atomic audit/feedback permission BLOCKED; P5-08/09/10 real model-integrated E2E/Gold/load NOT RUN and Phase 5 not started. Existing [risk owners and restrictions](risk-register.md) remain; none is considered PASSED by synthetic tests.
+
+**Required sequence:** (1) independent explicit `فاز ۵ را شروع کن`; (2) implement/test ADR-013 allowed scope and record Phase 5 actual results; (3) obtain a valid complete Phase 5 gate or separately justified `CONDITIONAL_PROGRESSION_APPROVED` for a named, safe Phase 6 scope with CI/DB/security evidence, owner and debt ledger; (4) re-audit Phase 6 entry before implementation. Critical employer-owned contracts and real data/model/server approvals remain mandatory for dependent work and final Production Readiness.
+
