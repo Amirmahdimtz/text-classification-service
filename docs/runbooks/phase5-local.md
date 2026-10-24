@@ -139,3 +139,16 @@ $py = ".\.venv\Scripts\python.exe"
 ```
 
 These tests require no confidential reports, real Gold or GPU, and targeted tests overlap the independent group. Do not send DSN/passwords. Actual model/authorized reviewer/API/Gold and capacity verification cannot be done using this synthetic test environment. See [real acceptance evidence prerequisites](../phase-5-acceptance-inputs.md).
+
+## Owner-directed dynamic taxonomy foundation — 2026-10-24
+
+Independent taxonomy draft tests are included in the normal non-PostgreSQL suite and do not require external data, business API, model or DB. Once the latest `main` is safely fast-forwarded after preserving local changes, run from the existing Windows project virtualenv:
+
+```powershell
+$py = ".\.venv\Scripts\python.exe"
+& $py -m compileall -q src tests tools
+& $py -m pytest -q tests/test_taxonomy_drafts.py
+& $py -m pytest -q -m "not postgres"
+```
+
+[CI 40105875237](https://github.com/Amirmahdimtz/text-classification-service/actions/runs/40105875237) independently passed the new tests and existing PostgreSQL/ML/security jobs. Targeted taxonomy tests overlap the independent count. Latest local Windows retest NOT RUN. The new Core service is **draft-only**: no administrative HTTP route, approved database model, Migration or release publish operation exists; do not substitute it for real organization-managed production taxonomy. Authorization/retention/schema and real model/version transition tests remain BLOCKED/DEFERRED.
