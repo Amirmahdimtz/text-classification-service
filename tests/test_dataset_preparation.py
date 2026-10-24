@@ -67,6 +67,37 @@ def test_temporal_split_and_missing_time():
     assert max(r.occurred_at for r in output["validation"]) < min(r.occurred_at for r in output["test"])
 
 
+
+def test_temporal_split_relocates_boundaries_for_spanning_group():
+    # An incident beginning on day 1 and ending on day 6 must not appear in
+    # VALIDATION while TRAIN contains days 2..5 (the previous algorithm did).
+    days = [(1, "spanning"), (2, "two"), (3, "three"), (4, "four"),
+            (5, "five"), (6, "spanning"), (7, "seven"), (8, "eight"),
+            (9, "nine")]
+    records = tuple(DatasetRecord(str(index), group, f"unique {index}",
+                    ("category-a",), datetime(2026, 1, day, tzinfo=timezone.utc))
+                    for index, (day, group) in enumerate(days))
+    splits = split_records(records, seed=17, ratios=(0.5, 0.25, 0.25), temporal=True)
+    assert all(splits[name] for name in ("train", "validation", "test"))
+    assert max(r.occurred_at for r in splits["train"]) < min(r.occurred_at for r in splits["validation"])
+    assert max(r.occurred_at for r in splits["validation"]) < min(r.occurred_at for r in splits["test"])
+    assert sum(r.group_id == "spanning" for r in splits["train"]) == 2
+    assert splits == split_records(records, seed=17, ratios=(0.5, 0.25, 0.25), temporal=True)
+
+
+def test_temporal_split_rejects_irreconcilable_intervals_and_tied_times():
+    days = [(1, "long"), (2, "two"), (3, "three"), (4, "four"),
+            (5, "five"), (6, "six"), (7, "seven"), (8, "eight"), (9, "long")]
+    records = tuple(DatasetRecord(str(index), group, f"unique {index}",
+                    ("category-a",), datetime(2026, 1, day, tzinfo=timezone.utc))
+                    for index, (day, group) in enumerate(days))
+    with pytest.raises(DatasetValidationError, match="strictly chronological"):
+        split_records(records, seed=9, ratios=(0.5, 0.25, 0.25), temporal=True)
+    tied = tuple(DatasetRecord(str(i), f"group-{i}", f"unique {i}",
+                 ("category-a",), datetime(2026, 1, 1, tzinfo=timezone.utc)) for i in range(8))
+    with pytest.raises(DatasetValidationError, match="strictly chronological"):
+        split_records(tied, seed=9, ratios=(0.5, 0.25, 0.25), temporal=True)
+
 def test_manifest_hmac_counts_without_report_text_or_ids():
     splits = split_records(_records(), seed=99, ratios=(0.5, 0.25, 0.25))
     kwargs = dict(fingerprint_key=b"a" * 32, authorization_reference="approved-test-ref",

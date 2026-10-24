@@ -152,8 +152,47 @@ def split_records(records: tuple[DatasetRecord, ...], *, seed: int,
     else:
         groups.sort(key=lambda g: sha256(f"{seed}:{min(records[i].report_id for i in g)}".encode()).digest())
     n = len(groups)
-    train_end = max(1, min(n - 2, round(n * ratios[0])))
-    validation_end = max(train_end + 1, min(n - 1, round(n * (ratios[0] + ratios[1]))))
+    if temporal:
+        # A component can contain reports from different dates. Sorting by its
+        # latest date alone does not make the resulting partitions chronological.
+        starts = [min(records[i].occurred_at for i in group) for group in groups]
+        ends = [max(records[i].occurred_at for i in group) for group in groups]
+        suffix_earliest = starts.copy()
+        for index in range(n - 2, -1, -1):
+            suffix_earliest[index] = min(starts[index], suffix_earliest[index + 1])
+
+        safe_cuts: list[int] = []
+        prefix_latest = ends[0]
+        for index in range(1, n):
+            if prefix_latest < suffix_earliest[index]:
+                safe_cuts.append(index)
+            prefix_latest = max(prefix_latest, ends[index])
+
+        # Find two strictly ordered, safe cut points closest to the requested
+        # group-count ratios. Never split an incident/duplicate component.
+        target_train = n * ratios[0]
+        target_validation = n * (ratios[0] + ratios[1])
+        best: tuple[tuple[float, ...], int, int] | None = None
+        best_train: int | None = None
+        best_train_key: tuple[float, int] | None = None
+        for boundary in safe_cuts:
+            if best_train is not None:
+                score = (abs(best_train - target_train) + abs(boundary - target_validation),
+                         abs(best_train - target_train),
+                         abs(boundary - target_validation), best_train, boundary)
+                if best is None or score < best[0]:
+                    best = (score, best_train, boundary)
+            train_key = (abs(boundary - target_train), boundary)
+            if best_train_key is None or train_key < best_train_key:
+                best_train, best_train_key = boundary, train_key
+        if best is None:
+            raise DatasetValidationError(
+                "Cannot form three strictly chronological splits without splitting incident groups"
+            )
+        _, train_end, validation_end = best
+    else:
+        train_end = max(1, min(n - 2, round(n * ratios[0])))
+        validation_end = max(train_end + 1, min(n - 1, round(n * (ratios[0] + ratios[1]))))
     split_group_sets = (groups[:train_end], groups[train_end:validation_end], groups[validation_end:])
     output = {}
     for name, subset in zip(("train", "validation", "test"), split_group_sets):
