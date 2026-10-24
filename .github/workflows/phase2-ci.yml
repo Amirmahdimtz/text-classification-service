@@ -1,4 +1,4 @@
-name: Phase 2/3 regression and offline ML checks
+name: Phase 2/3/4 regression, offline ML and dependency security checks
 on:
   push:
     branches: [main]
@@ -83,3 +83,20 @@ jobs:
       - name: Offline baseline and data integrity tests with synthetic fixtures only
         run: |
           python -m pytest -q tests/test_text_preprocessor.py tests/test_dataset_preparation.py tests/test_prepare_dataset_cli.py tests/test_artifact_manifest.py tests/test_baseline_model.py tests/test_text_classifier_provider.py
+  
+  dependency-security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install patched packaging tool and audited dependency closure
+        run: |
+          python -m pip install "pip==26.2.2"
+          python -m pip install -r requirements-dev.txt -r requirements-ml.txt "pip-audit==2.10.1"
+      - name: Validate installed dependency compatibility
+        run: python -m pip check
+      - name: Audit installed production, development and offline ML dependencies
+        run: python -m pip_audit --local --vulnerability-service osv --strict --timeout 60
