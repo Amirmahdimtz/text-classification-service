@@ -1,0 +1,59 @@
+# Phase 5 — Formal completion attempt, acceptance checklist and hard blockers
+
+**Review date:** 2026-10-24
+**Owner instruction:** `خب این مرحله را تمام کن` — interpreted as a request for **full Phase 5 completion**, not Phase 6 start or a waiver of its mandatory gates.
+**Approved normative sources:** `Service_Architecture_Guide_FA.md`, `Text_Classification_Service_Implementation_Plan_FA.md` v1.1.0, ADR-008, ADR-010, ADR-013 and ADR-014.
+**Reviewed repository main before repair:** `48950939f99e0c8996a2ea35db43d0152e5753a5`.
+**Repair SHA:** `28afaefbbd33ab05fcacba37a1c35ca316d1b47e`, [source fix](https://github.com/Amirmahdimtz/text-classification-service/commit/28afaefbbd33ab05fcacba37a1c35ca316d1b47e).
+**Gate outcome:** `NO-GO — PHASE_5_COMPLETE_READY_FOR_PHASE_6` is **not** justified. Official status stays `PHASE_5_IMPLEMENTED_AWAITING_VERIFICATION` for a completed and independently verified **subset only**.
+**Phase 6:** NOT STARTED; previously accepted [ADR-014](decisions/ADR-014-phase6-conditional-technical-entry.md) remains valid **only** for its P6-02/04/06/12 independent subset and still requires explicit `فاز ۶ را شروع کن`.
+
+## Independent issue corrected in this review
+
+**P5-06/P5-11 — Shutdown while capacity wait:** `TextClassifierProvider.predict_async` checked `is_ready` before awaiting the semaphore. `close_async` could then clear the model while the caller waited. On acquiring a slot, the old implementation dereferenced `self._model.predict`, potentially raising an unexpected `AttributeError` and leaving the slot unreleased. The repair captures a local model after acquiring capacity, verifies `not _closed` and non-null model, returns typed `InferenceUnavailableError` while releasing the slot, and submits `model.predict` to the existing bounded executor. The synthetic-only concurrency regression is `test_provider_close_while_waiting_for_capacity_fails_closed_without_slot_leak`; no fake model was added to Production.
+
+**REMOTE/AVAILABLE verified:** [Actions run 40102628553](https://github.com/Amirmahdimtz/text-classification-service/actions/runs/40102628553) on corrected source SHA, **four jobs SUCCESS**. Independent **85 PASSED / 1 SKIPPED (optional ML) / 4 DESELECTED**; real isolated PostgreSQL **4 PASSED / 1 SKIPPED / 85 DESELECTED**, Docker/API and empty Alembic smoke; offline synthetic ML **29 PASSED** (overlaps independent suite); dependency compatibility `pip check` PASS and strict installed-closure OSV `No known vulnerabilities found` at scan time. Two established Starlette/httpx and AnyIO deprecation warnings persist. No new tables, migration, business API or deployment.
+
+**LOCAL_USER:** Owner Windows Python 3.12.10 evidence on **previous source** `684bbbdf88f959f8197b56321ae3136a53355db5`: 85 independent PASSED / 4 PostgreSQL PASSED, targeted host/provider 11 PASSED, pip compatibility and OSV previously PASSED. **New concurrency-fix SHA not yet rerun on Windows**: `NOT RUN` for latest-source local parity; REMOTE independently passed. See [Windows runbook](runbooks/phase5-local.md).
+
+## Task-by-task completion ledger
+
+| Phase 5 task | Status | Condition needed to close |
+|---|---|---|
+| P5-01 | PARTIAL / PASSED for current Host/DI boundary only | Employer-approved secure Controller → Service → Provider/Repository integration; no public business endpoints exist today |
+| P5-02 | BLOCKED | Employer/Product approve taxonomy, label cardinality and final response DTO/status/evidence/version semantics |
+| P5-03 | BLOCKED | Engineering + Product/Data Governance approve persistence, immutable audit and retention; then implement Result/Evidence/Audit and prove multi-row rollback with real PostgreSQL |
+| P5-04 | BLOCKED | Product/Security approve idempotency namespace, retry/conflict semantics and record identity; implement and test real request/review retry cases |
+| P5-05 | BLOCKED | Security/Employer approve IdP/principal model, roles/tenant/record isolation and retention; implement AuthN/AuthZ and adversarial IDOR/record tests |
+| P5-06 | PARTIAL / PASSED for current safe failure paths | Final approved business API request-size/rate-limit/SLO/backpressure and real model timeout policy; verify live workload |
+| P5-07 | PARTIAL / PASSED for existing health/error contracts | Approved v1 classification/reviewer DTO + OpenAPI schema and compatibility regression |
+| P5-08 | DEFERRED / NOT RUN (actual E2E); BLOCKED prerequisites | Authorized model, taxonomy, secure API/review flow, actual PostgreSQL Result/Evidence/Audit persistence, approved test environment; integrated request→review→audit test |
+| P5-09 | DEFERRED / NOT RUN | Authorized independent Gold/OOD, released model/decision/explanation versions and approved regression criteria |
+| P5-10 | DEFERRED / NOT RUN | Representative authorized workload, model-capable compute, approved latency/throughput/capacity goals; measured stress/soak |
+| P5-11 | PARTIAL / PASSED current DB unavailable/recovery, DI/middleware and missing-model/timeout unit paths | Business partial-commit, concurrent review, missing-secret scenarios in approved integration, and real model timeout/recovery drills still BLOCKED/DEFERRED |
+| P5-12 | PARTIAL / DOCUMENTED for currently existing interfaces | Final API/error/feature flags/version compatibility, model/reviewer operational runbooks require approved final implementation |
+
+## Acceptance (DoD) matrix
+
+| Mandatory DoD | Verdict | Evidence / blocker |
+|---|---|---|
+| Actual request→result→review→audit E2E with real services | BLOCKED/NOT RUN | No authorized business API/reviewer workflow/model release |
+| Atomic persisted Result/Evidence/Audit, no partial state | BLOCKED/NOT RUN | Missing employer-approved business schema and transaction logic; generic DB tests are not equivalent |
+| Never convert security/infra errors into fake success or OUT_OF_SCOPE | PASSED for currently exposed existing paths only | Safe 503/unavailable/redacted 500 and provider fail-closed regressions; not final business API |
+| Approved taxonomy/model compatibility + v1 data contract | BLOCKED/NOT RUN | Approved taxonomy, cardinality and external DTO absent |
+| Real model/Explanation Gold regression | DEFERRED/NOT RUN | Lawful independent Gold and approved ML release absent |
+| Measured p50/p95/p99, CPU/GPU, memory, throughput, soak | DEFERRED/NOT RUN | Approved targets, model hardware and representative workload absent |
+| No runtime fake provider | PASSED for inspected independent code | Test doubles live only in tests; no production business classification route exists |
+
+**Hard decision:** The required DoD is not complete, so changing the Marker to `PHASE_5_COMPLETE_READY_FOR_PHASE_6` would misrepresent the project. The existing scoped `CONDITIONAL_PROGRESSION_APPROVED` for Phase 6 is **not** a Phase 5 completion.
+
+## External inputs, risk owners, and Phase 6 closure checkpoint
+
+- **Employer / Product / Taxonomy:** signed category taxonomy, single/multi-label policy, API/DTO rules and numeric quality targets. Blocks P5-01/02/07/08/09 and the relevant contract-specific P5-06 work.
+- **Security / Data Governance / Review Owner:** data-use authorization, privacy/retention, identity, RBAC/ABAC tenant/record scope, review/audit/idempotency approval. Blocks P5-03/04/05/08 and real P5-11 concurrency/atomic review tests.
+- **ML / Data Owner:** lawful disjoint Train/Validation/Gold/OOD, real model artifact and tokenizer/taxonomy versions, calibration/groundedness criteria. Blocks P5-08/09, and all carried model-dependent P3/P4 gates.
+- **Engineering / Operations:** approved PostgreSQL business schema, secured deployment/model compute, representative workload, capacity/SLO, failure/rollback environment. Blocks real P5-03/08/10/11 and final hardening.
+
+**Earliest closure:** Re-run actual tasks as soon as approved inputs exist. **Mandatory latest checkpoint:** Phase 6, *before* final acceptance and production release; all deferred model/security/reviewer tests must then be executed and assessed, never treated as PASSED merely because CI is green.
+
+**No secret, password, live DSN, private text, Gold data or unapproved model artifact is requested or committed.** This document does not change an employer contract or mark any test as PASSED without observed evidence.
