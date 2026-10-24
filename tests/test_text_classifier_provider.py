@@ -91,3 +91,35 @@ async def test_provider_close_during_warmup_never_retains_model(monkeypatch, tmp
     finally:
         release_warmup.set()
         await provider.close_async()
+
+
+@pytest.mark.asyncio
+async def test_provider_close_while_waiting_for_capacity_fails_closed_without_slot_leak():
+    """Model may become unavailable after the first readiness check."""
+    class TestOnlyModel:
+        def predict(self, texts):
+            return list(texts)
+
+    provider = TextClassifierProvider(config_reader=object())
+    provider._model = TestOnlyModel()  # Test-only model; never a production fallback.
+    await provider._capacity.acquire()
+    await provider._capacity.acquire()
+    request = asyncio.create_task(
+        provider.predict_async(["synthetic text"], timeout_seconds=2)
+    )
+    try:
+        # The request has passed initial is_ready and is now waiting for capacity.
+        await asyncio.sleep(0)
+        assert request.done() is False
+        await provider.close_async()
+        provider._capacity.release()
+        with pytest.raises(InferenceUnavailableError, match="not ready"):
+            await request
+        # One slot was held by the test; the failed request must release its slot.
+        assert provider._capacity._value == 1
+    finally:
+        if not request.done():
+            request.cancel()
+            await asyncio.gather(request, return_exceptions=True)
+        provider._capacity.release()
+        await provider.close_async()

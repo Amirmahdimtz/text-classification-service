@@ -72,9 +72,15 @@ class TextClassifierProvider:
             await asyncio.wait_for(self._capacity.acquire(), timeout_seconds)
         except asyncio.TimeoutError:
             raise InferenceTimeoutError("Inference capacity exhausted") from None
+        # Readiness can change while waiting for capacity: close_async may
+        # revoke the model between the initial check and this point.
+        model = self._model
+        if self._closed or model is None:
+            self._capacity.release()
+            raise InferenceUnavailableError("Model is not ready")
         loop = asyncio.get_running_loop()
         try:
-            future = loop.run_in_executor(self._executor, self._model.predict, texts)
+            future = loop.run_in_executor(self._executor, model.predict, texts)
         except RuntimeError:
             self._capacity.release()
             raise InferenceUnavailableError("Inference executor is unavailable") from None
