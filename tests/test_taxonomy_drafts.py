@@ -1,0 +1,124 @@
+"""Dynamic taxonomy drafts: synthetic definitions and no external data."""
+import pytest
+
+from src.core.services.taxonomy.taxonomy_service import (
+    TaxonomyCategory, TaxonomyCompatibilityError, TaxonomyDraft,
+    TaxonomyService, TaxonomyValidationError,
+)
+from src.infrastructure.di.bootstrap import bootstrap_di, resolve
+
+
+def category(code: str = "SYNTH-A", *, active: bool = False) -> TaxonomyCategory:
+    return TaxonomyCategory(
+        code=code, title="Synthetic test category", definition="Synthetic definition",
+        inclusion_criteria=("Synthetic inclusion",),
+        exclusion_criteria=("Synthetic exclusion",),
+        active=active,
+    )
+
+
+def test_dynamic_addition_keeps_previous_revision_unchanged():
+    service = TaxonomyService()
+    initial = service.start_draft("draft-v1")
+    first = service.add_category(initial, category())
+    newer = service.start_draft("draft-v2", previous=first)
+    second = service.add_category(newer, category("SYNTH-B"))
+    assert initial.categories == ()
+    assert first.categories == (category(),)
+    assert newer.categories == first.categories
+    assert second.parent_version == "draft-v1"
+    assert [c.code for c in service.list_categories(second)] == ["SYNTH-A", "SYNTH-B"]
+    assert service.list_categories(second, active_only=True) == ()
+
+
+def test_deactivation_keeps_identity_and_historical_revision():
+    service = TaxonomyService()
+    previous = TaxonomyDraft("release-v1", None, (category(active=True),))
+    revision = service.start_draft("draft-v2", previous=previous)
+    disabled = service.deactivate_category(revision, "SYNTH-A")
+    assert previous.categories[0].active is True
+    assert disabled.categories[0].active is False
+    assert disabled.categories[0].code == "SYNTH-A"
+    assert service.list_categories(disabled, active_only=True) == ()
+
+
+def test_inactive_category_code_cannot_be_recycled():
+    service = TaxonomyService()
+    draft = service.add_category(service.start_draft("draft-v1"), category())
+    with pytest.raises(TaxonomyValidationError, match="already exists"):
+        service.add_category(draft, category())
+
+
+def test_new_category_cannot_be_active_without_approval():
+    with pytest.raises(TaxonomyValidationError, match="inactive"):
+        TaxonomyService().add_category(
+            TaxonomyService().start_draft("draft-v1"), category(active=True)
+        )
+
+
+@pytest.mark.parametrize("bad", ["", " ", " v1", "v1 ", "v1\x00"])
+def test_invalid_revision_identity_fails_closed(bad):
+    with pytest.raises(TaxonomyValidationError):
+        TaxonomyService().start_draft(bad)
+
+
+def test_same_version_and_missing_category_are_rejected():
+    service = TaxonomyService()
+    draft = service.start_draft("draft-v1")
+    with pytest.raises(TaxonomyValidationError, match="earlier revision"):
+        service.start_draft("draft-v1", previous=draft)
+    with pytest.raises(TaxonomyValidationError, match="not found"):
+        service.deactivate_category(draft, "SYNTH-A")
+
+
+@pytest.mark.parametrize(
+    "bad_category",
+    [
+        TaxonomyCategory(code="", title="x"),
+        TaxonomyCategory(code="A", title=""),
+        TaxonomyCategory(code="A\n", title="x"),
+        TaxonomyCategory(code="A", title="x", active="yes"),
+        TaxonomyCategory(code="A", title="x", inclusion_criteria=["not a tuple"]),
+        TaxonomyCategory(code="A", title="x", negative_examples=("",)),
+    ],
+)
+def test_category_validation_fails_closed(bad_category):
+    with pytest.raises(TaxonomyValidationError):
+        TaxonomyService().add_category(
+            TaxonomyService().start_draft("draft-v1"), bad_category
+        )
+
+
+def test_read_only_compatibility_check_rejects_taxonomy_drift():
+    service = TaxonomyService()
+    previous = TaxonomyDraft("release-v1", None, (category(active=True),))
+    with pytest.raises(TaxonomyCompatibilityError, match="version"):
+        service.check_model_compatibility(
+            previous, model_taxonomy_version="release-v0",
+            model_category_codes=("SYNTH-A",),
+        )
+    with pytest.raises(TaxonomyCompatibilityError, match="do not match"):
+        service.check_model_compatibility(
+            previous, model_taxonomy_version="release-v1",
+            model_category_codes=("SYNTH-B",),
+        )
+    with pytest.raises(TaxonomyCompatibilityError, match="identities are invalid"):
+        service.check_model_compatibility(
+            previous, model_taxonomy_version="release-v1",
+            model_category_codes=("SYNTH-A", "SYNTH-A"),
+        )
+    service.check_model_compatibility(
+        previous, model_taxonomy_version="release-v1",
+        model_category_codes=("SYNTH-A",),
+    )
+
+
+def test_di_discovers_taxonomy_service_without_manual_registration():
+    bootstrap_di()
+    assert isinstance(resolve(TaxonomyService), TaxonomyService)
+
+
+def test_draft_shape_duplicate_identities_cannot_be_read():
+    bad = TaxonomyDraft("draft-v1", None, (category(), category()))
+    with pytest.raises(TaxonomyValidationError, match="cannot be reused"):
+        TaxonomyService().list_categories(bad)
