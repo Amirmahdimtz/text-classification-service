@@ -86,3 +86,18 @@ py -3.12 -m pip --python $py install "pip==26.2.2"
 The owner completed the steps immediately above in the project virtualenv. The recorded output confirms pip upgrade from `25.0.1` to `26.2.2`, existing `pip-audit==2.10.1`, `pip check`: `No broken requirements found`, and strict OSV local audit: `No known vulnerabilities found`. See [Phase 5 execution evidence](../phase-5-execution.md). **Local installed-dependency sub-gate PASSED at scan time**; earlier follow-up request to perform these four operations has been satisfied.
 
 On future Python dependency updates, repeat the existing `pip check` and `pip_audit` commands and relevant functional/integration regressions. Retain the redacted output and command exit statuses. Optional ML packages not installed in this venv are outside `--local` coverage; the separate CI `dependency-security` job evaluates the installed ML closure. A successful package audit remains separate from business AuthN/AuthZ, real model quality and Production release acceptance.
+
+## Post-audit Phase 5 lifecycle fix — optional owner Windows re-verification
+
+A targeted Phase 5 correctness review changed `src/host/app.py` and `src/infrastructure/text_classifier_provider.py` (with test-only fault/concurrency regressions) at [source fix fda5b106](https://github.com/Amirmahdimtz/text-classification-service/commit/fda5b1062010ccbf10e8715195c496b378f95e6c). [CI 40100292584](https://github.com/Amirmahdimtz/text-classification-service/actions/runs/40100292584) PASSED all jobs; **no owner Windows post-fix rerun has yet been supplied**. For the latest `main`, after inspecting `git status --short` and preserving any local changes, follow the existing `git switch main` and `git pull --ff-only origin main` instructions above. Run the same installed venv's exact commands:
+
+```powershell
+$py = ".\.venv\Scripts\python.exe"
+& $py -m compileall -q src tests tools
+& $py -m pytest -q tests/test_phase5_host.py tests/test_text_classifier_provider.py
+& $py -m pytest -q -m "not postgres"
+# Only with the preconfigured approved isolated *_test database:
+& $py -m pytest -q -rs -m postgres
+```
+
+The duplicate targeted tests overlap the full independent suite; don't sum totals. Return only sanitized command exits, test counts and SHA (never `DATABASE_URL` or `TEST_DATABASE_URL`). No model training or confidential data is needed. A conditional Phase 6 entry decision for narrow independent work is separately recorded in [ADR-014](../decisions/ADR-014-phase6-conditional-technical-entry.md); it does not start Phase 6.
