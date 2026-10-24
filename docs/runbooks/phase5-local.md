@@ -65,3 +65,18 @@ Share only (after redaction): clean/dirty `git status --short`, final HEAD SHA, 
 
 Real authorized train/Gold/OOD/calibration/groundedness, model warmup, classification→review→audit E2E, AuthZ/IDOR/tenant isolation, data-specific load/stress and backup/rollback require approved contracts, lawful data and secure server. No executable commands are invented here; see [Phase 3 server runbook](phase3-server.md) for the currently supported offline tooling, and [Phase 5 execution ledger](../phase-5-execution.md) for unresolved verification IDs. All such tasks stay BLOCKED/DEFERRED until authorized inputs exist.
 
+
+## Local packaging security follow-up after owner Phase 5 test run
+
+The owner reported 82/82 selected independent and 4/4 isolated PostgreSQL PASSED on the correct HEAD. Their installer notice identified `pip 25.0.1`, which [ADR-012](../decisions/ADR-012-phase4-dependency-security-remediation.md) previously associated with OSV advisories. Those passing tests do not constitute a local vulnerability audit. From the verified project root, and **only if the machine has Python 3.12 registered via `py -3.12`**, use an outside interpreter for the Windows target-environment pip upgrade to avoid self-replacement locking:
+
+```powershell
+$py = ".\.venv\Scripts\python.exe"
+py -3.12 -m pip --python $py install "pip==26.2.2"
+& $py -m pip install "pip-audit==2.10.1"
+& $py -m pip check
+& $py -m pip_audit --local --vulnerability-service osv --strict --timeout 60
+```
+
+`pip --python` must target the **same isolated project's** `.venv`; verify the environment before executing. If `py -3.12` is not available, stop and use a separately verified interpreter rather than guessing. OSV network errors/incomplete scans are NOT RUN/INCOMPLETE, **not** security PASS. Send only sanitized command exits and vulnerability IDs, never package environment variables, DSNs, credentials or confidential inputs. Re-run the Phase 5 independent and PostgreSQL tests if dependency versions are changed. Server/production and employer security acceptance remain separate gates.
+
