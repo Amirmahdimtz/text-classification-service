@@ -101,3 +101,7 @@ $py = ".\.venv\Scripts\python.exe"
 ```
 
 The duplicate targeted tests overlap the full independent suite; don't sum totals. Return only sanitized command exits, test counts and SHA (never `DATABASE_URL` or `TEST_DATABASE_URL`). No model training or confidential data is needed. A conditional Phase 6 entry decision for narrow independent work is separately recorded in [ADR-014](../decisions/ADR-014-phase6-conditional-technical-entry.md); it does not start Phase 6.
+
+## Owner Windows post-fix verification — 2026-10-24
+
+Owner completed post-audit checks on the correct repository at `684bbbdf88f959f8197b56321ae3136a53355db5`: Python 3.12.10; compilation PASSED; targeted Phase 5 Host/Provider **11 PASSED**; full independent **85 PASSED / 4 DESELECTED**; live isolated PostgreSQL **4 PASSED / 85 DESELECTED**; no failures, only 2 established dependency deprecation warnings. Targeted tests overlap with the full independent suite. The previous `Windows post-fix NOT RUN` statement above is historical and **superseded** by this checkpoint; [Phase 5 ledger](../phase-5-execution.md) contains detailed evidence and gate boundaries. No new manual retest is requested for this exact code solely to discharge this local regression debt.
