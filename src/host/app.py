@@ -57,17 +57,23 @@ def create_app() -> FastAPI:
         request_id = str(uuid4())
         token = request_id_var.set(request_id)
         try:
-            response = await call_next(request)
-        except Exception:
-            logger.error("unhandled_error")
-            response = JSONResponse(status_code=500, content={"error": {"code": "INTERNAL_ERROR", "request_id": request_id}})
-        response.headers["X-Request-ID"] = request_id
-        response.headers["X-Content-Type-Options"] = "nosniff"
-        response.headers["Referrer-Policy"] = "no-referrer"
-        response.headers["Cache-Control"] = "no-store"
-        logger.info("request_completed")
-        request_id_var.reset(token)
-        return response
+            try:
+                response = await call_next(request)
+            except Exception:
+                logger.error("unhandled_error")
+                response = JSONResponse(
+                    status_code=500,
+                    content={"error": {"code": "INTERNAL_ERROR", "request_id": request_id}},
+                )
+            response.headers["X-Request-ID"] = request_id
+            response.headers["X-Content-Type-Options"] = "nosniff"
+            response.headers["Referrer-Policy"] = "no-referrer"
+            response.headers["Cache-Control"] = "no-store"
+            logger.info("request_completed")
+            return response
+        finally:
+            # Cancellation or an unexpected error must never retain a request ID.
+            request_id_var.reset(token)
 
     @app.get("/health/live", include_in_schema=False)
     async def liveness():
@@ -76,7 +82,12 @@ def create_app() -> FastAPI:
     @app.get("/health/ready", include_in_schema=False)
     async def readiness(request: Request):
         db = getattr(request.app.state, "db", None)
-        if db is None or not await db.ping_async():
+        try:
+            is_ready = db is not None and await db.ping_async()
+        except Exception:
+            # Unexpected driver errors still mean unavailable, not a 500 or ready.
+            is_ready = False
+        if not is_ready:
             logger.warning("readiness_failed")
             return JSONResponse(status_code=503, content={"status": "not_ready"})
         return {"status": "ready"}
