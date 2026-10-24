@@ -48,6 +48,8 @@ def test_final_categories_and_automatic_or_ood_decisions_fail_closed():
                       score_kind=ScoreKind.CALIBRATED_PROBABILITY, score=0.8), DecisionDependencyError),
     (DecisionProposal(DecisionStatus.NEEDS_REVIEW, predicted_category="test-category",
                       score_kind=ScoreKind.RAW_MODEL_SCORE, score=float("nan")), DecisionContractError),
+    (DecisionProposal(DecisionStatus.NEEDS_REVIEW, predicted_category="test-category",
+                      score_kind=ScoreKind.RAW_MODEL_SCORE, score=10 ** 1000), DecisionContractError),
     (DecisionProposal(DecisionStatus.NEEDS_REVIEW, score_kind=ScoreKind.RAW_MODEL_SCORE, score=0.2), DecisionContractError),
     (DecisionProposal(DecisionStatus.NEEDS_REVIEW, predicted_category=" "), DecisionContractError),
 ])

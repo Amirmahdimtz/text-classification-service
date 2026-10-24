@@ -112,7 +112,7 @@ class DecisionPolicyService:
         elif type(proposal.score_kind) is not ScoreKind or proposal.score is None:
             raise DecisionContractError("Invalid score kind or missing score")
         else:
-            if type(proposal.score) not in (float, int) or not isfinite(proposal.score):
+            if type(proposal.score) is not float or not isfinite(proposal.score):
                 raise DecisionContractError("Invalid score value")
             if proposal.predicted_category is None:
                 raise DecisionContractError("A category score requires a proposed category")
