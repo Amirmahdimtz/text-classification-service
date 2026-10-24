@@ -123,3 +123,44 @@ async def test_provider_close_while_waiting_for_capacity_fails_closed_without_sl
             await asyncio.gather(request, return_exceptions=True)
         provider._capacity.release()
         await provider.close_async()
+
+
+@pytest.mark.asyncio
+async def test_provider_timeout_budget_is_shared_between_capacity_and_execution(monkeypatch):
+    """Capacity wait and inference must not each receive a full timeout budget."""
+    import src.infrastructure.text_classifier_provider as provider_module
+
+    class TestOnlyModel:
+        def predict(self, texts):
+            return list(texts)
+
+    provider = TextClassifierProvider(config_reader=object())
+    provider._model = TestOnlyModel()  # Test-only model, no production fallback.
+    # Fill both available slots to force a measurable capacity wait.
+    await provider._capacity.acquire()
+    await provider._capacity.acquire()
+
+    actual_wait_for = asyncio.wait_for
+    budgets = []
+
+    async def capture_timeout(awaitable, timeout):
+        budgets.append(timeout)
+        return await actual_wait_for(awaitable, timeout)
+
+    async def unblock():
+        await asyncio.sleep(0.03)
+        provider._capacity.release()
+
+    release_task = asyncio.create_task(unblock())
+    try:
+        # Inspect actual wait-for time budgets while preserving real asyncio.
+        with monkeypatch.context() as patch:
+            patch.setattr(provider_module.asyncio, "wait_for", capture_timeout)
+            assert await provider.predict_async(["synthetic"], timeout_seconds=0.3) == ["synthetic"]
+        assert len(budgets) == 2
+        assert budgets[0] == 0.3
+        assert 0 < budgets[1] < budgets[0] - 0.01
+    finally:
+        await release_task
+        provider._capacity.release()
+        await provider.close_async()

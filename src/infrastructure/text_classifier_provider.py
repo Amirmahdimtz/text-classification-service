@@ -68,6 +68,11 @@ class TextClassifierProvider:
             raise ValueError("Input batch must contain 1..32 valid bounded text inputs")
         if not 0 < timeout_seconds <= 120:
             raise ValueError("Invalid inference timeout")
+        # One end-to-end deadline applies to both waiting for capacity and
+        # actual inference. A fresh timeout after acquisition would allow a
+        # single request to consume nearly twice its documented time budget.
+        loop = asyncio.get_running_loop()
+        deadline = loop.time() + timeout_seconds
         try:
             await asyncio.wait_for(self._capacity.acquire(), timeout_seconds)
         except asyncio.TimeoutError:
@@ -78,7 +83,10 @@ class TextClassifierProvider:
         if self._closed or model is None:
             self._capacity.release()
             raise InferenceUnavailableError("Model is not ready")
-        loop = asyncio.get_running_loop()
+        remaining = deadline - loop.time()
+        if remaining <= 0:
+            self._capacity.release()
+            raise InferenceTimeoutError("Inference deadline exceeded") from None
         try:
             future = loop.run_in_executor(self._executor, model.predict, texts)
         except RuntimeError:
@@ -87,7 +95,7 @@ class TextClassifierProvider:
         # Release the semaphore only after the real worker returns, even on request timeout.
         future.add_done_callback(lambda completed: self._capacity.release())
         try:
-            return await asyncio.wait_for(asyncio.shield(future), timeout_seconds)
+            return await asyncio.wait_for(asyncio.shield(future), max(0, deadline - loop.time()))
         except asyncio.TimeoutError:
             raise InferenceTimeoutError("Model execution timed out") from None
         except asyncio.CancelledError:
