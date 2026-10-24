@@ -122,3 +122,27 @@ def test_draft_shape_duplicate_identities_cannot_be_read():
     bad = TaxonomyDraft("draft-v1", None, (category(), category()))
     with pytest.raises(TaxonomyValidationError, match="cannot be reused"):
         TaxonomyService().list_categories(bad)
+
+
+def test_category_metadata_can_be_revised_in_new_draft_without_changing_history():
+    service = TaxonomyService()
+    previous = TaxonomyDraft("release-v1", None, (category(active=True),))
+    draft = service.start_draft("draft-v2", previous=previous)
+    revision = TaxonomyCategory(
+        code="SYNTH-A", title="Revised synthetic title",
+        definition="Revised synthetic definition", active=True,
+    )
+    edited = service.revise_category(draft, revision)
+    assert edited.categories[0].title == "Revised synthetic title"
+    assert previous.categories[0].title == "Synthetic test category"
+    assert edited.version == "draft-v2" and edited.parent_version == "release-v1"
+    assert draft.categories == previous.categories
+
+
+def test_category_edit_must_not_silently_activate_or_replace_identity():
+    service = TaxonomyService()
+    draft = service.add_category(service.start_draft("draft-v1"), category())
+    with pytest.raises(TaxonomyValidationError, match="Activation"):
+        service.revise_category(draft, category(active=True))
+    with pytest.raises(TaxonomyValidationError, match="not found"):
+        service.revise_category(draft, category("UNLISTED"))

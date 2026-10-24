@@ -134,6 +134,24 @@ class TaxonomyService:
         _validate_draft(updated)
         return updated
 
+    def revise_category(self, draft: TaxonomyDraft, category: TaxonomyCategory) -> TaxonomyDraft:
+        """Revise a category in an untrusted draft, not a published release."""
+        _validate_draft(draft)
+        _validate_category(category)
+        previous = next((item for item in draft.categories if item.code == category.code), None)
+        if previous is None:
+            raise TaxonomyValidationError("Category not found")
+        if previous.active != category.active:
+            raise TaxonomyValidationError("Activation cannot be changed by editing category details")
+        updated = replace(
+            draft,
+            categories=tuple(
+                category if item.code == category.code else item for item in draft.categories
+            ),
+        )
+        _validate_draft(updated)
+        return updated
+
     def list_categories(self, draft: TaxonomyDraft, *, active_only: bool = False) -> tuple[TaxonomyCategory, ...]:
         _validate_draft(draft)
         if type(active_only) is not bool:

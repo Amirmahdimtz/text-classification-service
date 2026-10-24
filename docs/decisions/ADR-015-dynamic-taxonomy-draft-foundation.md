@@ -8,7 +8,7 @@
 
 ## Decision and safety boundaries
 
-- Implement **immutable Core draft values and pure operations** under `src/core/services/taxonomy/taxonomy_service.py`: draft from prior revision, dynamic category addition (inactive by default and enforced), category deactivation rather than physical deletion, identity preservation, validation and active-category/model-version consistency check.
+- Implement **immutable Core draft values and pure operations** under `src/core/services/taxonomy/taxonomy_service.py`: draft from prior revision, dynamic category addition (inactive by default and enforced), explicit metadata revisions within a draft (without changing activation), category deactivation rather than physical deletion, identity preservation, validation and active-category/model-version consistency check.
 - Existing revisions are immutable. Deactivated IDs remain reserved and historical categories persist; any semantic change must be a new version with explicit future impact assessment. Do not recycle an inactive category code.
 - No hard-coded real category names, labels, numbers, taxonomy, label-mode or probability thresholds are introduced. All category details are external inputs. Offline tests use **synthetic-only** categories.
 - A draft or successful structural validation **does not** equal an approved/published taxonomy or an accurate model. No inference route or automatic classification is activated. The existing model manifest's `taxonomy_version` remains required, and mismatches must fail closed. The new Core check compares IDs only and does not prove semantics, provenance, reviewer authorization or model performance.
