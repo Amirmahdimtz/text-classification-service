@@ -30,3 +30,7 @@ Add --temporal only if the audited split also had it. Model CLI explicitly requi
 There are currently no commands for encoder training, Gold/OOD evaluation or full stress because such programs and environment have not been implemented/approved. Inventing a runnable command would mislead the operator.
 
 Return securely only reviewed aggregated benchmark reports, complete version and hash metadata, test/CI links, permitted error codes and sanitized capacity evidence. Never expose model artifacts containing confidential character ngrams, original datasets, credentials, or the HMAC key.
+
+## Temporal holdout integrity
+
+For an authorized dataset audited with `--temporal`, the splitter now preserves entire incident/near-duplicate components and requires strict chronological separation between train, validation and test. It may move ratio cut points or fail closed when no valid triple partition exists. Treat rejection as a split design/data adjudication task for the ML/data owner; do not disable the guard. This cannot replace real semantic leakage review and Gold verification due in Phase 6.

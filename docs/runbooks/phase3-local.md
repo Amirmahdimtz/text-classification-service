@@ -47,3 +47,16 @@ Authorized-only audit command, after these prerequisites:
 The example label mode must be replaced with the formally approved value (single-label or multi-label). Add --temporal if the approved protocol uses time-aware holdouts. Ratios/seed are NOT prescribed by this document. The tool checks duplicates, groups and reproducibility and writes aggregate counts and keyed HMACs, not raw split exports. Heuristic near-duplicate detection is not sufficient for expert adjudication. It intentionally refuses writing metadata within the public checkout or overwriting an output file.
 
 Send sanitized git SHA, Python version, test totals, Phase 1 validator output, DB tests and health status codes. Never send raw reports, PII, HMAC key, DSNs, auth headers, private absolute paths or sensitive cohort statistics.
+
+## Temporal split regression — 2026-10-24
+
+Chronological mode now selects two strictly separated boundaries across entire grouped incidents; an unsplittable timeline produces a validation error instead of leakage. From a verified clean checkout of the updated `main` and existing environment:
+
+    .\.venv\Scripts\python.exe -m pytest -q tests/test_dataset_preparation.py
+    .\.venv\Scripts\python.exe -m pytest -q -m "not postgres"
+
+After configuring only the isolated `phase2_test` DB according to phase2-local.md:
+
+    .\.venv\Scripts\python.exe -m pytest -q -rs -m postgres
+
+The [CI evidence](https://github.com/Amirmahdimtz/text-classification-service/actions/runs/40077902341) validates synthetic boundaries and live DB software paths, not real model performance. Never show secrets or full DSNs in logs.

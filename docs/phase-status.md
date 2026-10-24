@@ -3,8 +3,9 @@
 **Current phase:** PHASE 3 — Persian NLP, Dataset & Classification Engine
 **Marker:** PHASE_3_IMPLEMENTED_AWAITING_VERIFICATION
 **Previous verified marker:** PHASE_2_COMPLETE_READY_FOR_PHASE_3
-**Status as of:** 2026-10-21
-**Next phase:** NOT STARTED — Phase 4 needs a separate explicit user command and Phase 3 real model/data gate verification
+**Status as of:** 2026-10-24
+**Progression Authorization:** `CONDITIONAL_PROGRESSION_APPROVED` for independent Phase 4 scope only (ADR-010); Phase 4 NOT STARTED.
+**Next phase:** NOT STARTED — explicit `فاز ۴ را شروع کن` required; true model verification remains deferred to Phase 6.
 **Documentation snapshot verified:** 0834bfe31be38a618981d1b814254b7282bb51d6 (GitHub main; 26 Phase 1 documents/tool files added after README initialization).
 
 ## Revised phase-gate decision (ADR-008)
@@ -63,3 +64,25 @@ Phase 1 internal technical documentation gate is **PASSED**, with external/busin
 - **External gates:** DEC-01, DEC-02/03, DEC-04, DEC-05/09, DEC-08, DEC-10 remain BLOCKED. No employer-signed taxonomy/cardinality, authorized training/Gold/OOD data, calibrated probabilities, numerical targets, permitted model environment or real release. **Real baseline/encoder benchmark, Gold macro-F1, OOD, calibration, real inference/load and production rollback are NOT RUN.**
 - **Records:** [Phase 3 execution](phase-3-execution.md), [Private Windows audit](runbooks/phase3-local.md), [Server ML runbook](runbooks/phase3-server.md), [Artifact specification](model-artifact-manifest.md), [Benchmark status](phase-3-benchmark-report.md), [ADR-009](decisions/ADR-009-phase3-offline-artifacts-and-offsets.md).
 - **Gate:** Remain PHASE_3_IMPLEMENTED_AWAITING_VERIFICATION until all technical and model requirements receive genuine evidence. No permission to start Phase 4 without a separate explicit owner command. Employer's formal final acceptance remains Phase 6 per ADR-008.
+
+## Phase 3 temporal correction and local-first decision — 2026-10-24
+
+- **Formal marker (unchanged):** `PHASE_3_IMPLEMENTED_AWAITING_VERIFICATION`. **Separate progression authorization:** `CONDITIONAL_PROGRESSION_APPROVED` for independent Phase 4 only. Phase 4 NOT STARTED; requires explicit owner command. See [ADR-010](decisions/ADR-010-local-first-and-conditional-phase-progression.md).
+- **Correction:** [7fcbfa7](https://github.com/Amirmahdimtz/text-classification-service/commit/7fcbfa711c32b8170be7a4b243306e0d30f40fdc) makes temporal split boundaries strictly chronological over full incident/duplicate components; impossible partitions fail closed.
+- **REMOTE/AVAILABLE:** [GitHub Actions 40077902341](https://github.com/Amirmahdimtz/text-classification-service/actions/runs/40077902341) SUCCESS on correction SHA: independent 46 PASSED, 1 SKIPPED, 3 DESELECTED; real isolated PostgreSQL 3 PASSED, 1 SKIPPED, 46 DESELECTED; offline ML 27 PASSED. Jobs share tests; these counts must not be added together.
+- **LOCAL_USER:** Owner-provided Windows Python 3.12 logs on earlier SHA: compile and docs validation PASSED, 45 independent tests PASSED, 3 PostgreSQL integration tests PASSED. New temporal regression was REMOTE PASSED, Windows re-run NOT RUN.
+- **Phase 4 allowed scope:** original-text Evidence offsets, mechanical span/quote fidelity, fail-closed failure semantics and isolated non-sensitive tests. **Blocked pending business decisions:** category relevance, thresholds/calibration, AuthN/AuthZ, review permissions, physical DB schema, confidential data or public classifier route.
+
+### Mandatory deferred verification ledger (latest Phase 6)
+
+| Tasks | Status / reason | Risk owner | Required evidence / latest deadline |
+|---|---|---|---|
+| P3-01/03 real data, class supports, semantic and temporal leakage | BLOCKED: no approved corpus | ML lead and data owner | Authorized labeled corpus/annotation and expert case audit by Phase 6 |
+| P3-04/05 baseline, encoder, Macro-F1 and per-class | DEFERRED / NOT RUN: dataset, label mode, licenses and compute absent | ML lead and product owner | Approved train/validation/Gold, fair comparison by Phase 6 |
+| P3-06/07 long documents, rare/ambiguous, OOD and temporal Gold | DEFERRED / NOT RUN: no adjudicated representative cases | ML lead and data owner | Curated authorized Gold/OOD cohorts by Phase 6 |
+| P3-08 and P4-05 calibration/coverage/risk | DEFERRED / NOT RUN: no real scores or approved policy | ML lead and product owner | Validation-only calibration and independent Gold verification by Phase 6 |
+| P3-09..12 real artifact and inference/load/rollback | DEFERRED / NOT RUN: no approved model/runtime | ML lead, operations and security | Secure server, approved artifact/SLO, real performance and rollback by Phase 6 |
+| P4-02/04/10 real explanation relevance and fidelity | BLOCKED: no signed taxonomy or adjudicated examples | Taxonomy owner, reviewers and ML | Groundedness/unsupported-evidence evaluation by Phase 6 |
+| P5-08/09/10 real integrated E2E, Gold regression and stress | DEFERRED / NOT RUN: real model/server prerequisites missing | Engineering, ML and operations | Integrated server checks, fixes and regression by Phase 6 |
+
+This progression is NOT a Phase 3 completion gate, does NOT approve sensitive-data processing, and does NOT imply Production Readiness.

@@ -1,5 +1,5 @@
 # P1-12 — Risk register and decision dependencies
-**Reviewed:** 2026-10-21 | **Status:** Active; severity qualitative until organization risk scoring approved.
+**Reviewed:** 2026-10-24 | **Status:** Active; severity qualitative until organization risk scoring approved.
 
 | ID | Risk / impact | Severity | Decision owner | Mitigation or evidence required | State |
 |---|---|---|---|---|---|
@@ -18,6 +18,7 @@
 | R-13 | Single/multi-label remains unapproved → breaking API/model design | Critical | Product + employer | decision on case policy and annotation units | BLOCKED |
 | R-14 | Retention and deployment geography unapproved → legal/operational uncertainty | Critical | Security + data governance | GOV-01..07 signoff | BLOCKED |
 | R-15 | Public repository leakage via fixtures or docs | High | Engineering + security | no real data, credential scan before publish; minimize examples | MITIGATED DESIGN, continuous |
+| R-16 | Real model quality or runtime failures discovered late under Local-First | High | ML lead + project owner + operations | Evidence debt ledger and early testing when approved, mandatory Phase 6 closure | OPEN / PHASE 6 |
 
 **Escalation:** Critical BLOCKED items prevent Phase 1 full acceptance or production-facing implementation. Deferral to later phases is documented dependency, never an implicit waiver. Risk owner and approval evidence must be recorded in phase-status and ADRs.
 
@@ -30,3 +31,9 @@
 - R-07/R-15: derived model JSON vocabulary can expose sensitive character sequences; release and dataset must remain private; offline CLI forbids output under repo and Git ignore protects common private artifact types. Full authorized exfiltration audit remains BLOCKED.
 - R-08/R-09: artifact/evaluation SHA-256 and version checks, bounded warmup provider implemented; actual secure registry, signature, real load/performance, rollback BLOCKED; owner ops/security.
 - R-10: Phase 3 provider discovery and existing Phase 2 DI/CI regressions reviewed; future controller/production inference connection NOT IMPLEMENTED (depends on auth/API contract).
+
+## Local-first risk update (2026-10-24)
+
+- R-03: Temporal group-boundary overlap was corrected and checked with two new synthetic regressions in [CI 40077902341](https://github.com/Amirmahdimtz/text-classification-service/actions/runs/40077902341). Real semantic duplicate, group/time audit remains BLOCKED without authorized data. **Owner:** ML lead and data owner; **review deadline:** by Phase 6, preferably before training.
+- R-16: Gold/OOD/model benchmarks, calibration, actual groundedness, model E2E, load and rollback remain DEFERRED/NOT RUN. **Owners:** ML, employer/product, security and operations; **prerequisites:** approved taxonomy, lawful dataset, model/server and agreed quality targets; **deadline:** Phase 6 acceptance. See [phase-status ledger](phase-status.md).
+- Local-first conditional progression is scope-limited by [ADR-010](decisions/ADR-010-local-first-and-conditional-phase-progression.md). Critical schema/AuthN/privacy/taxonomy decisions remain BLOCKED where applicable.
