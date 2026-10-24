@@ -126,3 +126,80 @@ async def test_phase5_isolated_postgres_connection_failure_and_recovery():
         assert await available.ping_async() is True
     finally:
         await available.close_async()
+
+
+@pytest.mark.postgres
+@pytest.mark.asyncio
+async def test_phase5_real_postgres_two_write_atomicity_and_rollback():
+    """Exercise DbContext's real atomic multi-write boundary without business schema.
+
+    A TEMP table is bound to one physical test DB connection to make all
+    observations deterministic across commit and rollback. No durable tables,
+    migrations or customer records are used.
+    """
+    from types import SimpleNamespace
+
+    from sqlalchemy.ext.asyncio import async_sessionmaker
+
+    url = os.getenv("TEST_DATABASE_URL", "")
+    if not url:
+        pytest.skip("TEST_DATABASE_URL is not configured")
+    assert url.startswith("postgresql+asyncpg://") and url.split("?", 1)[0].endswith("_test"), (
+        "Only isolated *_test databases are permitted"
+    )
+
+    db = PsqlDbContext(
+        config_reader=SimpleNamespace(database_url=url),
+        vault_service=object(),  # Test-only explicit dependency.
+    )
+    try:
+        async with db._engine.connect() as connection:
+            await connection.execute(
+                text("CREATE TEMP TABLE phase5_atomic_probe "
+                     "(record_kind TEXT NOT NULL, record_value TEXT NOT NULL) "
+                     "ON COMMIT PRESERVE ROWS")
+            )
+            await connection.commit()
+
+            # Transaction/session APIs remain production DbContext methods.
+            # Only the test factory is pinned to the TEMP table's connection.
+            db._session_factory = async_sessionmaker(
+                connection, expire_on_commit=False, autoflush=False
+            )
+
+            with pytest.raises(RuntimeError, match="test-only-mid-operation"):
+                async with db.transaction() as session:
+                    await session.execute(
+                        text("INSERT INTO phase5_atomic_probe VALUES ('result', 'synthetic')")
+                    )
+                    await session.execute(
+                        text("INSERT INTO phase5_atomic_probe VALUES ('evidence', 'synthetic')")
+                    )
+                    raise RuntimeError("test-only-mid-operation")
+
+            async with db.session() as session:
+                rolled_back = (
+                    await session.execute(text("SELECT count(*) FROM phase5_atomic_probe"))
+                ).scalar_one()
+            assert rolled_back == 0
+
+            async with db.transaction() as session:
+                await session.execute(
+                    text("INSERT INTO phase5_atomic_probe VALUES ('result', 'synthetic')")
+                )
+                await session.execute(
+                    text("INSERT INTO phase5_atomic_probe VALUES ('evidence', 'synthetic')")
+                )
+
+            async with db.session() as session:
+                committed = (
+                    await session.execute(
+                        text("SELECT record_kind FROM phase5_atomic_probe ORDER BY record_kind")
+                    )
+                ).scalars().all()
+            assert committed == ["evidence", "result"]
+
+            await connection.execute(text("DROP TABLE phase5_atomic_probe"))
+            await connection.commit()
+    finally:
+        await db.close_async()

@@ -23,6 +23,8 @@ def create_app() -> FastAPI:
     try:
         config = resolve(ConfigReader)
         web = resolve(WebService)
+        # Validate the last required factory metadata inside the DI cleanup guard.
+        app_version = config.get("app.version")
     except Exception:
         shutdown_di()
         raise
@@ -50,7 +52,7 @@ def create_app() -> FastAPI:
                 logger.info("shutdown_completed")
 
     app = FastAPI(
-        title="Text Classification Service", version=config.get("app.version"),
+        title="Text Classification Service", version=app_version,
         lifespan=lifespan,
         docs_url=None, redoc_url=None, openapi_url=None,
     )

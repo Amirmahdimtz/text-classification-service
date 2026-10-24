@@ -183,3 +183,26 @@ def test_database_disposal_error_does_not_leave_di_alive(monkeypatch):
 
     with pytest.raises(DependencyError, match="bootstrap_di"):
         di_module.resolve(ConfigReader)
+
+
+def test_factory_missing_version_metadata_cleans_di(monkeypatch):
+    """Configuration failure during factory creation must not leak DI state."""
+    import src.infrastructure.di.bootstrap as di_module
+    from src.infrastructure.di.inject import DependencyError
+    from src.infrastructure.utils.config_reader import ConfigReader, ConfigurationError
+
+    original_get = ConfigReader.get
+
+    def fail_only_version(self, dotted_key):
+        if dotted_key == "app.version":
+            raise ConfigurationError("Test-only required app version unavailable")
+        return original_get(self, dotted_key)
+
+    monkeypatch.setattr(ConfigReader, "get", fail_only_version)
+    with pytest.raises(ConfigurationError, match="app version unavailable"):
+        create_app()
+    with pytest.raises(DependencyError, match="bootstrap_di"):
+        di_module.resolve(ConfigReader)
+
+    monkeypatch.setattr(ConfigReader, "get", original_get)
+    assert create_app().title == "Text Classification Service"
