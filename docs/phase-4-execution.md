@@ -36,8 +36,8 @@ All task statuses describe **independent source changes**; passing synthetic tes
 |---|---|---|
 | Local builder Python 3.13.5 — new Phase 4 module compilation | PASSED | Isolated local working tree with copies of existing preprocessing/DI source; not a full GitHub checkout |
 | Local builder — `python -m pytest -q tests/test_phase4_evidence.py tests/test_phase4_decision.py` | **29 PASSED** | New synthetic tests in isolated reconstructed workspace; GitHub CI remains authoritative for full repository |
-| REMOTE independent full regression, DI and offline ML | PENDING CI on Phase 4 commit | Record actual run/SHA; do not assume success |
-| REMOTE isolated PostgreSQL integration | PENDING CI on Phase 4 commit | Existing 3 tests only; no Phase 4 business schema / reviewer transaction exists |
+| REMOTE independent full regression, DI and offline ML | PASSED — run 40079884573 on c46679be5b0328e747d350e5ef7da4759762c3f5: independent 75 passed/1 skipped/3 deselected; offline ML 27 passed | Suites overlap; synthetic/offline tests do not prove model accuracy |
+| REMOTE isolated PostgreSQL integration | PASSED — same run: 3 passed/1 skipped/75 deselected; Docker health + Alembic smoke succeeded | Existing 3 DB tests only; no Phase 4 reviewer schema/transaction exists |
 | LOCAL_USER Windows Python 3.12 and PostgreSQL 17 | NOT RUN on owner machine | Commands in `docs/runbooks/phase4-local.md`; sanitized owner logs needed |
 | SERVER_MODEL Gold, calibration, review/corpus, real E2E/load | BLOCKED / DEFERRED | Approved taxonomy, dataset, security and deployed model required by Phase 6 |
 
@@ -61,13 +61,21 @@ All task statuses describe **independent source changes**; passing synthetic tes
 
 ## Acceptance checklist
 
-- [x] Independent evidence offsets and quote validation code with adversarial tests (isolated builder verification; CI pending).
+- [x] Independent evidence offsets and quote validation code with adversarial tests (local isolated verification and GitHub CI passed).
 - [x] No unsupported category explanation presented as verified.
 - [x] Raw margins remain non-probabilistic; auto/OOD status issuance gated.
 - [x] No unapproved public endpoint, AuthZ, schema, migration or production fake.
-- [ ] Full repository CI on exact Phase 4 commit and owner Windows/DB parity.
+- [x] Full repository CI on exact Phase 4 implementation commit (run 40079884573).
+- [ ] Owner Windows/Python 3.12 and PostgreSQL parity after pulling Phase 4 implementation.
 - [ ] Approved taxonomy/criteria, calibrated release, semantic Explanation Gold and real OOD.
 - [ ] Approved reviewer AuthN/AuthZ, immutable audit schema, atomic review/concurrency integration.
 - [ ] Real server/model E2E/rollback/load and customer acceptance in Phase 6.
 
 **Progression note:** Do not issue `PHASE_4_COMPLETE_READY_FOR_PHASE_5`. Any **future** independent Phase 5 conditional progression requires fresh owner command, adequate CI/local security/DB evidence and separately recorded scope, risk/debt and authorization. This phase does not start Phase 5.
+
+## GitHub Actions verified source revision
+
+- **Implementation commit:** [c46679be5](https://github.com/Amirmahdimtz/text-classification-service/commit/c46679be5b0328e747d350e5ef7da4759762c3f5); from original `64588fda`, fast-forward with 11 scoped changed files and no migration.
+- **[GitHub Actions run 40079884573](https://github.com/Amirmahdimtz/text-classification-service/actions/runs/40079884573): SUCCESS.** `independent`: 75 PASSED, 1 SKIPPED (optional ML), 3 DESELECTED (PostgreSQL). `ml-independent`: 27 PASSED (overlapping earlier tests). `integration`: 3 real PostgreSQL PASSED, 1 SKIPPED, 75 DESELECTED; API Docker startup/health and empty Alembic upgrade smoke succeeded. These counts **must not be added together**. The 29 new independent Phase 4 cases are included in the 75.
+- **NOT RUN:** Owner Windows local parity (Python 3.12), real reviewer PostgreSQL/concurrent AuthZ tests (blocked schema), real model/Gold/threshold/groundedness/latency tests (blocked external inputs), real server rollback.
+- **No false completion:** `PHASE_3_IMPLEMENTED_AWAITING_VERIFICATION` unchanged; Phase 4 remains `PHASE_4_IMPLEMENTED_AWAITING_VERIFICATION`. This Phase 4 scope is not a complete reviewer/explanation feature or authorization to start Phase 5.
