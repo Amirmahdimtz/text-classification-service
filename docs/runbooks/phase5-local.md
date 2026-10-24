@@ -80,3 +80,9 @@ py -3.12 -m pip --python $py install "pip==26.2.2"
 
 `pip --python` must target the **same isolated project's** `.venv`; verify the environment before executing. If `py -3.12` is not available, stop and use a separately verified interpreter rather than guessing. OSV network errors/incomplete scans are NOT RUN/INCOMPLETE, **not** security PASS. Send only sanitized command exits and vulnerability IDs, never package environment variables, DSNs, credentials or confidential inputs. Re-run the Phase 5 independent and PostgreSQL tests if dependency versions are changed. Server/production and employer security acceptance remain separate gates.
 
+
+## Owner Windows dependency-security follow-up — 2026-10-24
+
+The owner completed the steps immediately above in the project virtualenv. The recorded output confirms pip upgrade from `25.0.1` to `26.2.2`, existing `pip-audit==2.10.1`, `pip check`: `No broken requirements found`, and strict OSV local audit: `No known vulnerabilities found`. See [Phase 5 execution evidence](../phase-5-execution.md). **Local installed-dependency sub-gate PASSED at scan time**; earlier follow-up request to perform these four operations has been satisfied.
+
+On future Python dependency updates, repeat the existing `pip check` and `pip_audit` commands and relevant functional/integration regressions. Retain the redacted output and command exit statuses. Optional ML packages not installed in this venv are outside `--local` coverage; the separate CI `dependency-security` job evaluates the installed ML closure. A successful package audit remains separate from business AuthN/AuthZ, real model quality and Production release acceptance.

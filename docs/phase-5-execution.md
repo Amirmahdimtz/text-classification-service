@@ -75,3 +75,18 @@ Test suite counts overlap; **do not add them**. Two pre-existing Starlette/httpx
 - Runtime readiness, measured concurrency/latency and secure rollback: ML + Operations (DEC-10).
 - **Latest closure checkpoint:** before Phase 6 final acceptance (prefer earlier if approved); re-evaluate each blocked subtask as soon as actual inputs are delivered. See [current risk register](risk-register.md).
 
+
+## Owner Windows dependency-security follow-up — 2026-10-24
+
+**Evidence source:** Owner-submitted PowerShell log from the existing project `.venv`, following the previously verified Windows run on `2129d174c416adceeefa3a5de1740d6e9fc1667b`. This is supplied **LOCAL_USER** evidence, not execution by the assistant or GitHub. The follow-up did not print a fresh Git SHA or `$LASTEXITCODE`; the command outputs show no errors and each command returned to the prompt.
+
+| Security command | Actual owner-reported result | Status / scope |
+|---|---|---|
+| `py -3.12 -m pip --python .\.venv\Scripts\python.exe install "pip==26.2.2"` | Replaced pip `25.0.1` with `26.2.2` (`Successfully installed`) | PASSED; addresses the previously flagged local pip version only |
+| `python -m pip install "pip-audit==2.10.1"` | Exact scanner version already satisfied in project venv | PASSED / PRESENT |
+| `python -m pip check` | `No broken requirements found.` | PASSED; dependency installation consistency, not a security scan |
+| `python -m pip_audit --local --vulnerability-service osv --strict --timeout 60` | `No known vulnerabilities found` | PASSED, owner-reported; applies to installed local package set at scan time, no claim about uninstalled optional dependencies |
+
+**Updated local R-17 checkpoint:** Local dependency-compatibility and strict OSV audit evidence is now **PASSED for the scanned Windows virtualenv**, superseding its earlier `NOT RUN` at this checkpoint. Continuous OSV rechecks remain mandatory when packages, advisories or deployment environment change. No dependency update to application code or `requirements*.txt` was committed here. The earlier Windows functional regression **82 PASSED** and actual isolated PostgreSQL **4 PASSED** remain separate evidence; the user did not re-run them in this follow-up, and no new application test execution is claimed.
+
+**Security boundary:** A clean dependency audit is not a Phase 5 full security gate, AuthN/AuthZ/IDOR review, data privacy approval, model review, production vulnerability attestation or SERVER_MODEL benchmark. Two existing Starlette/httpx and AnyIO deprecation warnings remain. **Marker: `PHASE_5_IMPLEMENTED_AWAITING_VERIFICATION`. No Phase 6 authorization.**
