@@ -19,6 +19,7 @@
 | R-14 | Retention and deployment geography unapproved → legal/operational uncertainty | Critical | Security + data governance | GOV-01..07 signoff | BLOCKED |
 | R-15 | Public repository leakage via fixtures or docs | High | Engineering + security | no real data, credential scan before publish; minimize examples | MITIGATED DESIGN, continuous |
 | R-16 | Real model quality or runtime failures discovered late under Local-First | High | ML lead + project owner + operations | Evidence debt ledger and early testing when approved, mandatory Phase 6 closure | OPEN / PHASE 6 |
+| R-17 | Known vulnerabilities in Python application/test/build dependencies or security scanner outage | High | Engineering + Security | Pin verified compatible FastAPI/Starlette/Pytest/pip, fail-closed OSV dependency-closure scan on each CI run, review future advisories and deprecation debt | REMEDIATION COMMITTED / CI PENDING |
 
 **Escalation:** Critical BLOCKED items prevent Phase 1 full acceptance or production-facing implementation. Deferral to later phases is documented dependency, never an implicit waiver. Risk owner and approval evidence must be recorded in phase-status and ADRs.
 
@@ -46,3 +47,9 @@
 - **R-07 / R-14 (CRITICAL, security + data governance):** No confidential text, external model calls or unsanctioned retention added. In-process quotes still require protected record-scoped authorization and report-version binding before any persistence/public exposure; no external input approval implied.
 - **R-16 (HIGH, ML + operations + owner):** Phase 3 and Phase 4 ML/Gold/model-dependent verification remain DEFERRED, with model accuracy, groundedness, latency, OOD and coverage not measured. Full closure required by Phase 6.
 - **R-10 (MEDIUM, engineering):** Explicit Core package initializer and no-arg injectable constructors prevent Phase 4 `pkgutil` discovery/DI resolution failures; synthetic DI test coverage added; remote/Windows parity must be assessed from actual CI/user runs.
+
+## Phase 4 vulnerability-remediation risk evidence — 2026-10-24
+
+- **R-17 (HIGH, Engineering + Security):** Baseline Starlette `0.50.0` (5 distinct advisories), pytest `9.0.2` (1) and local packaging pip `25.0.1` (6) flagged by owner-supplied `pip-audit` logs; repeated entries were not counted as distinct issues. The initial CI never ran a dependency scan.
+- **Mitigation:** Owner Windows isolated patched versions `fastapi==0.134.0`, `starlette==1.3.1`, `pytest==9.0.3`, `pip==26.2.2` passed software/DB regression and OSV returned no known vulnerabilities. Repo requirements, Docker and CI security job updated, pending fresh CI evidence on the corrected SHA. CI network/OSV failure should block a clean scan claim; never disable audit to obtain a green build.
+- **Residual:** Dependency advisories can emerge after release; current scan is not authorization for sensitive report processing. Starlette `httpx` and AnyIO deprecation warnings are compatibility debt. Review with Security before any Phase 5 conditional authorization, then continuously at CI and Phase 6 acceptance. Employer-owned AuthN/AuthZ, schema, Gold and real model gates (R-01/02/05/06/07/11/12/13/14/16) remain unchanged.
