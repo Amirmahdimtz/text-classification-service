@@ -111,3 +111,29 @@ async def test_model_unconfigured_is_never_warmed_or_successful(monkeypatch):
             await provider.predict_async(["non-sensitive synthetic input"])
     finally:
         await provider.close_async()
+
+
+@pytest.mark.asyncio
+async def test_request_context_cleanup_when_logging_aborts(monkeypatch):
+    """The cleanup must run even when response post-processing raises."""
+    import src.host.app as app_module
+
+    app = create_app()
+    original_info = app_module.logger.info
+
+    def fail_only_on_request_completion(event):
+        if event == "request_completed":
+            raise RuntimeError("TEST_ONLY_POST_PROCESSING_FAILURE")
+        return original_info(event)
+
+    monkeypatch.setattr(app_module.logger, "info", fail_only_on_request_completion)
+    outer = request_id_var.set("outer-test-context")
+    try:
+        async with httpx.AsyncClient(
+            transport=httpx.ASGITransport(app=app), base_url="http://test"
+        ) as client:
+            with pytest.raises(Exception):
+                await client.get("/health/live")
+        assert request_id_var.get() == "outer-test-context"
+    finally:
+        request_id_var.reset(outer)
