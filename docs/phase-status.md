@@ -94,7 +94,7 @@ This progression is NOT a Phase 3 completion gate, does NOT approve sensitive-da
 - **Phase 4 implementation marker:** `PHASE_4_IMPLEMENTED_AWAITING_VERIFICATION`, not `PHASE_4_COMPLETE_READY_FOR_PHASE_5`. This marker describes independent Core work; actual employer-governed task scope is still partial/blocked. Phase 5 is NOT STARTED and NOT AUTHORIZED by Phase 4 changes.
 - **Implementation:** original-offset EvidenceService, controlled evidence-only literal transcript and mechanical verification, versioned decision-policy **draft** structural validator and review-only proposal semantics. `AUTO_CLASSIFIED`/`OUT_OF_SCOPE`, confidence, final category and semantic category justification remain gated. No Controller, DB schema, Alembic migration, reviewer entity, production model, unapproved AuthZ or confidential dataset.
 - **Detailed Phase 4 task ledger and acceptance:** [Phase 4 execution](phase-4-execution.md), [ADR-011](decisions/ADR-011-phase4-evidence-only-and-decision-gate.md), [Windows/DB instructions](runbooks/phase4-local.md).
-- **Verification:** Python 3.13.5 isolated builder: 29 Phase 4 synthetic tests PASSED; this is *not* entire-repository evidence. GitHub run 40079884573 SUCCESS on c46679be5b0328e747d350e5ef7da4759762c3f5: independent 75 PASSED/1 SKIPPED/3 DESELECTED; offline ML 27 PASSED (overlap); isolated live PostgreSQL 3 PASSED/1 SKIPPED/75 DESELECTED, Docker and Alembic smoke succeeded. Windows Python 3.12 owner run NOT RUN. Actual Gold/model evaluation NOT RUN.
+- **Verification:** Python 3.13.5 isolated builder: 30 Phase 4 synthetic tests PASSED; this is *not* entire-repository evidence. GitHub run 40080190182 SUCCESS on 390220a93325f115d6e6193c792f9de83905c35e: independent 76 PASSED/1 SKIPPED/3 DESELECTED; offline ML 27 PASSED (overlap); isolated live PostgreSQL 3 PASSED/1 SKIPPED/76 DESELECTED, Docker and Alembic smoke succeeded. Windows Python 3.12 owner run NOT RUN. Actual Gold/model evaluation NOT RUN.
 
 ### Phase 4 deferred verification register (must close by Phase 6 acceptance)
 
@@ -108,3 +108,8 @@ This progression is NOT a Phase 3 completion gate, does NOT approve sensitive-da
 | Carried Phase 3 model/data/Gold/OOD and future Phase 5 server E2E/load | DEFERRED/NOT RUN | ML, data, security, operations | Real approved model, dataset, taxonomy and controlled server; Phase 6 |
 
 The prior Phase 3 verification debt remains open as documented above; local synthetics never establish real model performance. Neither ADR-010 nor ADR-011 authorizes use of sensitive reports.
+
+### Phase 4 final hardening evidence — 2026-10-24
+
+- [Code hardening 390220a](https://github.com/Amirmahdimtz/text-classification-service/commit/390220a93325f115d6e6193c792f9de83905c35e) prevents oversized non-float score input from triggering unhandled numerical overflow. [Actions 40080190182](https://github.com/Amirmahdimtz/text-classification-service/actions/runs/40080190182) **SUCCESS**: independent 76 PASSED/1 SKIPPED, offline ML 27 PASSED (overlaps), real isolated PostgreSQL 3 PASSED/1 SKIPPED, Docker/Alembic startup healthy.
+- No Phase 4 real reviewer schema/permission transaction has been tested; P4-07..09 remain BLOCKED, model-dependent P4-02/04/05/10 remain DEFERRED until Phase 6. Phase 3 marker and Phase 4 partial marker remain unchanged, and there is **no Phase 5 progression approval**.

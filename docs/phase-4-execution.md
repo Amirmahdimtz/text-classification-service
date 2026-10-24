@@ -35,9 +35,9 @@ All task statuses describe **independent source changes**; passing synthetic tes
 | Environment / check | Result | Limits |
 |---|---|---|
 | Local builder Python 3.13.5 — new Phase 4 module compilation | PASSED | Isolated local working tree with copies of existing preprocessing/DI source; not a full GitHub checkout |
-| Local builder — `python -m pytest -q tests/test_phase4_evidence.py tests/test_phase4_decision.py` | **29 PASSED** | New synthetic tests in isolated reconstructed workspace; GitHub CI remains authoritative for full repository |
-| REMOTE independent full regression, DI and offline ML | PASSED — run 40079884573 on c46679be5b0328e747d350e5ef7da4759762c3f5: independent 75 passed/1 skipped/3 deselected; offline ML 27 passed | Suites overlap; synthetic/offline tests do not prove model accuracy |
-| REMOTE isolated PostgreSQL integration | PASSED — same run: 3 passed/1 skipped/75 deselected; Docker health + Alembic smoke succeeded | Existing 3 DB tests only; no Phase 4 reviewer schema/transaction exists |
+| Local builder — `python -m pytest -q tests/test_phase4_evidence.py tests/test_phase4_decision.py` | **30 PASSED** | New synthetic tests in isolated reconstructed workspace; GitHub CI remains authoritative for full repository |
+| REMOTE independent full regression, DI and offline ML | PASSED — run 40079884573 on c46679be5b0328e747d350e5ef7da4759762c3f5: independent 76 passed/1 skipped/3 deselected; offline ML 27 passed | Suites overlap; synthetic/offline tests do not prove model accuracy |
+| REMOTE isolated PostgreSQL integration | PASSED — same run: 3 passed/1 skipped/76 deselected; Docker health + Alembic smoke succeeded | Existing 3 DB tests only; no Phase 4 reviewer schema/transaction exists |
 | LOCAL_USER Windows Python 3.12 and PostgreSQL 17 | NOT RUN on owner machine | Commands in `docs/runbooks/phase4-local.md`; sanitized owner logs needed |
 | SERVER_MODEL Gold, calibration, review/corpus, real E2E/load | BLOCKED / DEFERRED | Approved taxonomy, dataset, security and deployed model required by Phase 6 |
 
@@ -65,7 +65,7 @@ All task statuses describe **independent source changes**; passing synthetic tes
 - [x] No unsupported category explanation presented as verified.
 - [x] Raw margins remain non-probabilistic; auto/OOD status issuance gated.
 - [x] No unapproved public endpoint, AuthZ, schema, migration or production fake.
-- [x] Full repository CI on exact Phase 4 implementation commit (run 40079884573).
+- [x] Full repository CI on exact Phase 4 implementation commit (run 40080190182).
 - [ ] Owner Windows/Python 3.12 and PostgreSQL parity after pulling Phase 4 implementation.
 - [ ] Approved taxonomy/criteria, calibrated release, semantic Explanation Gold and real OOD.
 - [ ] Approved reviewer AuthN/AuthZ, immutable audit schema, atomic review/concurrency integration.
@@ -76,6 +76,13 @@ All task statuses describe **independent source changes**; passing synthetic tes
 ## GitHub Actions verified source revision
 
 - **Implementation commit:** [c46679be5](https://github.com/Amirmahdimtz/text-classification-service/commit/c46679be5b0328e747d350e5ef7da4759762c3f5); from original `64588fda`, fast-forward with 11 scoped changed files and no migration.
-- **[GitHub Actions run 40079884573](https://github.com/Amirmahdimtz/text-classification-service/actions/runs/40079884573): SUCCESS.** `independent`: 75 PASSED, 1 SKIPPED (optional ML), 3 DESELECTED (PostgreSQL). `ml-independent`: 27 PASSED (overlapping earlier tests). `integration`: 3 real PostgreSQL PASSED, 1 SKIPPED, 75 DESELECTED; API Docker startup/health and empty Alembic upgrade smoke succeeded. These counts **must not be added together**. The 29 new independent Phase 4 cases are included in the 75.
+- **[GitHub Actions run 40079884573](https://github.com/Amirmahdimtz/text-classification-service/actions/runs/40079884573): SUCCESS.** `independent`: 75 PASSED, 1 SKIPPED (optional ML), 3 DESELECTED (PostgreSQL). `ml-independent`: 27 PASSED (overlapping earlier tests). `integration`: 3 real PostgreSQL PASSED, 1 SKIPPED, 75 DESELECTED; API Docker startup/health and empty Alembic upgrade smoke succeeded. These counts **must not be added together**. The 30 new independent Phase 4 cases are included in the 76.
 - **NOT RUN:** Owner Windows local parity (Python 3.12), real reviewer PostgreSQL/concurrent AuthZ tests (blocked schema), real model/Gold/threshold/groundedness/latency tests (blocked external inputs), real server rollback.
 - **No false completion:** `PHASE_3_IMPLEMENTED_AWAITING_VERIFICATION` unchanged; Phase 4 remains `PHASE_4_IMPLEMENTED_AWAITING_VERIFICATION`. This Phase 4 scope is not a complete reviewer/explanation feature or authorization to start Phase 5.
+
+## Final Phase 4 hardening regression (supersedes earlier per-commit counts)
+
+- Root cause: an arbitrarily large Python integer passed as an in-process draft model score could raise `OverflowError` at `math.isfinite` rather than a deliberate validation error. Because the actual `RawPrediction.raw_margin` contract is `float`, Phase 4 now rejects every non-`float` score before `isfinite`. A synthetic `10 ** 1000` negative regression test was added. This is strictly within Phase 4 score/failure semantics.
+- **Hardening code commit:** [390220a93325f115d6e6193c792f9de83905c35e](https://github.com/Amirmahdimtz/text-classification-service/commit/390220a93325f115d6e6193c792f9de83905c35e) (fast-forward, only decision-policy code and test).
+- **[CI run 40080190182](https://github.com/Amirmahdimtz/text-classification-service/actions/runs/40080190182): SUCCESS on that exact SHA.** Independent 76 PASSED, 1 SKIPPED, 3 DESELECTED; offline ML 27 PASSED; existing isolated real PostgreSQL 3 PASSED, 1 SKIPPED, 76 DESELECTED. CI also ran compile/docs-validator, Docker health and Alembic empty-schema smoke. **Suites overlap** and are not additive. This is software integrity only, not production model or reviewer approval.
+- Local isolated builder with the hardening patch: 30 Phase 4 tests PASSED; owner Windows local verification NOT RUN; no approved reviewer DB schema exists.
