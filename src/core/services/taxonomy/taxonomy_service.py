@@ -38,6 +38,26 @@ class TaxonomyDraft:
     categories: tuple[TaxonomyCategory, ...]
 
 
+@dataclass(frozen=True, slots=True)
+class TaxonomyRevisionImpact:
+    """Structural delta only; does not approve a taxonomy or compatible model."""
+
+    parent_version: str
+    draft_version: str
+    added_codes: tuple[str, ...]
+    deactivated_codes: tuple[str, ...]
+    revised_codes: tuple[str, ...]
+    model_revalidation_required: bool
+
+
+def _category_metadata(category: TaxonomyCategory) -> tuple[object, ...]:
+    return (
+        category.title, category.definition, category.inclusion_criteria,
+        category.exclusion_criteria, category.positive_examples,
+        category.negative_examples,
+    )
+
+
 def _valid_text(value: object, *, can_be_empty: bool = False) -> bool:
     return (
         type(value) is str
@@ -157,6 +177,47 @@ class TaxonomyService:
         if type(active_only) is not bool:
             raise TaxonomyValidationError("Invalid category filter")
         return tuple(item for item in draft.categories if item.active or not active_only)
+
+    def assess_revision(
+        self, previous: TaxonomyDraft, draft: TaxonomyDraft,
+    ) -> TaxonomyRevisionImpact:
+        """Check the structural safety of a forked draft before any approval.
+
+        This is an offline consistency check, not a publish or promotion action.
+        Models must always be revalidated when the taxonomy version changes.
+        """
+        _validate_draft(previous)
+        _validate_draft(draft)
+        if draft.parent_version != previous.version or draft.version == previous.version:
+            raise TaxonomyValidationError("Taxonomy revision must name its exact parent")
+        before = {item.code: item for item in previous.categories}
+        after = {item.code: item for item in draft.categories}
+        if before.keys() - after.keys():
+            raise TaxonomyValidationError("Historical category identities cannot be removed")
+        added = []
+        deactivated = []
+        revised = []
+        for code, current in after.items():
+            original = before.get(code)
+            if original is None:
+                if current.active:
+                    raise TaxonomyValidationError("New categories cannot be activated by a draft")
+                added.append(code)
+                continue
+            if not original.active and current.active:
+                raise TaxonomyValidationError("Category reactivation requires an approved workflow")
+            if original.active and not current.active:
+                deactivated.append(code)
+            if _category_metadata(original) != _category_metadata(current):
+                revised.append(code)
+        return TaxonomyRevisionImpact(
+            parent_version=previous.version,
+            draft_version=draft.version,
+            added_codes=tuple(sorted(added)),
+            deactivated_codes=tuple(sorted(deactivated)),
+            revised_codes=tuple(sorted(revised)),
+            model_revalidation_required=True,
+        )
 
     def check_model_compatibility(
         self, draft: TaxonomyDraft, *, model_taxonomy_version: str,

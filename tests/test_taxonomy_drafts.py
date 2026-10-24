@@ -146,3 +146,65 @@ def test_category_edit_must_not_silently_activate_or_replace_identity():
         service.revise_category(draft, category(active=True))
     with pytest.raises(TaxonomyValidationError, match="not found"):
         service.revise_category(draft, category("UNLISTED"))
+
+
+
+def test_revision_impact_reports_dynamic_changes_deterministically():
+    service = TaxonomyService()
+    previous = TaxonomyDraft(
+        "release-v1", None,
+        (category("SYNTH-B", active=True), category("SYNTH-A", active=True)),
+    )
+    draft = service.start_draft("draft-v2", previous=previous)
+    draft = service.deactivate_category(draft, "SYNTH-A")
+    draft = service.revise_category(
+        draft,
+        TaxonomyCategory(
+            code="SYNTH-B", title="Updated synthetic title",
+            definition="Synthetic definition", active=True,
+        ),
+    )
+    draft = service.add_category(draft, category("SYNTH-C"))
+    impact = service.assess_revision(previous, draft)
+    assert impact.parent_version == "release-v1"
+    assert impact.draft_version == "draft-v2"
+    assert impact.added_codes == ("SYNTH-C",)
+    assert impact.deactivated_codes == ("SYNTH-A",)
+    assert impact.revised_codes == ("SYNTH-B",)
+    assert impact.model_revalidation_required is True
+    assert previous.categories[0].title == "Synthetic test category"
+
+
+def test_revision_without_category_changes_still_requires_model_version_validation():
+    service = TaxonomyService()
+    parent = TaxonomyDraft("release-v1", None, (category("SYNTH-A", active=True),))
+    child = service.start_draft("draft-v2", previous=parent)
+    report = service.assess_revision(parent, child)
+    assert report.added_codes == report.deactivated_codes == report.revised_codes == ()
+    assert report.model_revalidation_required is True
+
+
+@pytest.mark.parametrize("mode", ["delete", "reactivate", "activate-new", "unlinked"])
+def test_revision_validation_rejects_unsafe_transitions(mode):
+    service = TaxonomyService()
+    parent = TaxonomyDraft(
+        "release-v1", None,
+        (category("SYNTH-A", active=False), category("SYNTH-B", active=True)),
+    )
+    new = service.start_draft("draft-v2", previous=parent)
+    if mode == "delete":
+        new = TaxonomyDraft("draft-v2", "release-v1", (category("SYNTH-A"),))
+    elif mode == "reactivate":
+        new = TaxonomyDraft(
+            "draft-v2", "release-v1",
+            (category("SYNTH-A", active=True), category("SYNTH-B", active=True)),
+        )
+    elif mode == "activate-new":
+        new = TaxonomyDraft(
+            "draft-v2", "release-v1",
+            (*parent.categories, category("SYNTH-C", active=True)),
+        )
+    else:
+        new = TaxonomyDraft("draft-v2", "unrelated-version", parent.categories)
+    with pytest.raises(TaxonomyValidationError):
+        service.assess_revision(parent, new)
