@@ -1,11 +1,12 @@
 # Phase status
 **Project:** text-classification-service
-**Current phase:** PHASE 3 — Persian NLP, Dataset & Classification Engine
-**Marker:** PHASE_3_IMPLEMENTED_AWAITING_VERIFICATION
+**Current phase:** PHASE 4 — Grounded Explanation, Decision Policy & Human Review
+**Marker:** PHASE_4_IMPLEMENTED_AWAITING_VERIFICATION
+**Previous Phase 3 marker (unchanged):** PHASE_3_IMPLEMENTED_AWAITING_VERIFICATION
 **Previous verified marker:** PHASE_2_COMPLETE_READY_FOR_PHASE_3
 **Status as of:** 2026-10-24
-**Progression Authorization:** `CONDITIONAL_PROGRESSION_APPROVED` for independent Phase 4 scope only (ADR-010); Phase 4 NOT STARTED.
-**Next phase:** NOT STARTED — explicit `فاز ۴ را شروع کن` required; true model verification remains deferred to Phase 6.
+**Progression Authorization:** `CONDITIONAL_PROGRESSION_APPROVED` for the independent Phase 4 entry only (ADR-010); explicit owner Phase 4 start received on 2026-10-24; **NOT** authorization for Phase 5.
+**Next phase:** Phase 5 NOT STARTED; requires a separate owner command and independently justified, recorded progression gate. Real model verification remains deferred to Phase 6.
 **Documentation snapshot verified:** 0834bfe31be38a618981d1b814254b7282bb51d6 (GitHub main; 26 Phase 1 documents/tool files added after README initialization).
 
 ## Revised phase-gate decision (ADR-008)
@@ -86,3 +87,24 @@ Phase 1 internal technical documentation gate is **PASSED**, with external/busin
 | P5-08/09/10 real integrated E2E, Gold regression and stress | DEFERRED / NOT RUN: real model/server prerequisites missing | Engineering, ML and operations | Integrated server checks, fixes and regression by Phase 6 |
 
 This progression is NOT a Phase 3 completion gate, does NOT approve sensitive-data processing, and does NOT imply Production Readiness.
+
+## Phase 4 independent implementation — 2026-10-24
+
+- **Entry:** owner explicitly requested Phase 4 while the Phase 3 marker remained `PHASE_3_IMPLEMENTED_AWAITING_VERIFICATION`; `CONDITIONAL_PROGRESSION_APPROVED` is valid only for Phase 4's independent scope under ADR-010. Initial actual main HEAD `64588fda0cc88194d888cc2ee32a67e7c444fe23`; source CI run 40078427070 SUCCESS.
+- **Phase 4 implementation marker:** `PHASE_4_IMPLEMENTED_AWAITING_VERIFICATION`, not `PHASE_4_COMPLETE_READY_FOR_PHASE_5`. This marker describes independent Core work; actual employer-governed task scope is still partial/blocked. Phase 5 is NOT STARTED and NOT AUTHORIZED by Phase 4 changes.
+- **Implementation:** original-offset EvidenceService, controlled evidence-only literal transcript and mechanical verification, versioned decision-policy **draft** structural validator and review-only proposal semantics. `AUTO_CLASSIFIED`/`OUT_OF_SCOPE`, confidence, final category and semantic category justification remain gated. No Controller, DB schema, Alembic migration, reviewer entity, production model, unapproved AuthZ or confidential dataset.
+- **Detailed Phase 4 task ledger and acceptance:** [Phase 4 execution](phase-4-execution.md), [ADR-011](decisions/ADR-011-phase4-evidence-only-and-decision-gate.md), [Windows/DB instructions](runbooks/phase4-local.md).
+- **Verification:** Python 3.13.5 isolated builder: 29 Phase 4 synthetic tests PASSED; this is *not* entire-repository evidence. Full GitHub CI and actual isolated PostgreSQL regression pending a run on the Phase 4 commit; Windows Python 3.12 owner run NOT RUN. Actual Gold/model evaluation NOT RUN.
+
+### Phase 4 deferred verification register (must close by Phase 6 acceptance)
+
+| Task/Test | State / risk | Risk owner | Unblock evidence / checkpoint |
+|---|---|---|---|
+| P4-02, P4-03 semantic reasons, P4-04 and P4-10 Gold hallucination/groundedness | BLOCKED / DEFERRED: no criteria, signed taxonomy or Gold | Employer/taxonomy, ML, expert reviewers, data owner | Published inclusion/exclusion criteria, lawful Gold review spans and independent adjudication; Phase 6 |
+| P4-05 and P4-06 real threshold, OOD and calibrated auto decision | BLOCKED / DEFERRED: no approved label mode/model/validation/policy | Employer/product + ML | Calibrated validation probabilities, per-category risk/coverage gates, OOD criteria, versioned approved policy; Phase 6 |
+| P4-07 Reviewer workflow AuthN/AuthZ, claim/correct/approve/concurrency | BLOCKED: no identity, tenant, reviewer permission policy | Security and employer/review owner | AuthN/AuthZ + record-scoped permissions, state machine/review requirements, real concurrency test; Phase 6 |
+| P4-08 review result, immutable audit and PostgreSQL atomic transaction | BLOCKED: no physical schema, record retention or transaction idempotency contract | Employer/product, data/security, engineering | Signed ERD, lifecycle and retention; migration with real isolated PostgreSQL tests and audit; Phase 6 |
+| P4-09 reviewer feedback downstream training rights | BLOCKED: no feedback governance or permitted reuse | Data governance, review owner, ML | Provenance, adjudication, consent/legal rights and approved split promotion; Phase 6 |
+| Carried Phase 3 model/data/Gold/OOD and future Phase 5 server E2E/load | DEFERRED/NOT RUN | ML, data, security, operations | Real approved model, dataset, taxonomy and controlled server; Phase 6 |
+
+The prior Phase 3 verification debt remains open as documented above; local synthetics never establish real model performance. Neither ADR-010 nor ADR-011 authorizes use of sensitive reports.
