@@ -91,5 +91,10 @@ class TextClassifierProvider:
 
     async def close_async(self) -> None:
         self._closed = True
-        self._model = None
-        await asyncio.to_thread(self._executor.shutdown, wait=True, cancel_futures=True)
+        # Wait for any in-flight warmup before clearing the model reference.
+        # Without the lock, load_async can install a model after close_async.
+        try:
+            async with self._load_lock:
+                self._model = None
+        finally:
+            await asyncio.to_thread(self._executor.shutdown, wait=True, cancel_futures=True)

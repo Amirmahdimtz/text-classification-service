@@ -137,3 +137,49 @@ async def test_request_context_cleanup_when_logging_aborts(monkeypatch):
         assert request_id_var.get() == "outer-test-context"
     finally:
         request_id_var.reset(outer)
+
+
+def test_factory_mount_failure_cleans_di_and_allows_fresh_bootstrap(monkeypatch):
+    """A controller discovery failure happens before lifespan is entered."""
+    import src.application.web as web_module
+    import src.infrastructure.di.bootstrap as di_module
+    from src.infrastructure.di.inject import DependencyError
+    from src.infrastructure.utils.config_reader import ConfigReader
+
+    original_mount = web_module.WebService.mount
+
+    def fail_mount(self, app):
+        raise DependencyError("Test-only controller discovery failure")
+
+    monkeypatch.setattr(web_module.WebService, "mount", fail_mount)
+    with pytest.raises(DependencyError, match="Test-only controller"):
+        create_app()
+    with pytest.raises(DependencyError, match="bootstrap_di"):
+        di_module.resolve(ConfigReader)
+
+    monkeypatch.setattr(web_module.WebService, "mount", original_mount)
+    assert create_app().title == "Text Classification Service"
+
+
+def test_database_disposal_error_does_not_leave_di_alive(monkeypatch):
+    """A failure to dispose the DB engine must not retain stale DI singletons."""
+    import src.infrastructure.di.bootstrap as di_module
+    from src.infrastructure.di.inject import DependencyError
+    from src.infrastructure.utils.config_reader import ConfigReader
+
+    class DisposingEngine:
+        async def dispose(self):
+            raise RuntimeError("TEST_ONLY_DISPOSE_FAILURE")
+
+    monkeypatch.setattr(db_module, "create_async_engine", lambda *a, **kw: DisposingEngine())
+
+    async def healthy(_self):
+        return True
+
+    monkeypatch.setattr(db_module.PsqlDbContext, "ping_async", healthy)
+    with pytest.raises(RuntimeError, match="TEST_ONLY_DISPOSE_FAILURE"):
+        with TestClient(create_app()) as client:
+            assert client.get("/health/ready").status_code == 200
+
+    with pytest.raises(DependencyError, match="bootstrap_di"):
+        di_module.resolve(ConfigReader)

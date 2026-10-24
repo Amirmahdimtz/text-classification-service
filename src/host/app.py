@@ -41,10 +41,13 @@ def create_app() -> FastAPI:
             logger.error("startup_failed")
             raise
         finally:
-            if database is not None:
-                await database.close_async()
-            shutdown_di()
-            logger.info("shutdown_completed")
+            try:
+                if database is not None:
+                    await database.close_async()
+            finally:
+                # A failing DB disposer must never leave the DI registry bootstrapped.
+                shutdown_di()
+                logger.info("shutdown_completed")
 
     app = FastAPI(
         title="Text Classification Service", version=config.get("app.version"),
@@ -92,5 +95,10 @@ def create_app() -> FastAPI:
             return JSONResponse(status_code=503, content={"status": "not_ready"})
         return {"status": "ready"}
 
-    web.mount(app)
+    try:
+        web.mount(app)
+    except Exception:
+        # Factory errors happen before lifespan can dispose the DI registry.
+        shutdown_di()
+        raise
     return app

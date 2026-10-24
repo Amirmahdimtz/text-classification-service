@@ -50,3 +50,44 @@ async def test_provider_does_not_reload_per_request():
     assert await provider.predict_async(["next"]) == ["next"]
     assert test_model.calls == 2 and provider.is_ready
     await provider.close_async()
+
+
+@pytest.mark.asyncio
+async def test_provider_close_during_warmup_never_retains_model(monkeypatch, tmp_path):
+    """Test-only synchronization reproduces the load/close publication race."""
+    from threading import Event
+    from src.infrastructure.ml.tfidf_linear_model import TfidfLinearModel
+
+    warming = Event()
+    release_warmup = Event()
+
+    class TestOnlyModel:
+        def predict(self, texts):
+            warming.set()
+            if not release_warmup.wait(timeout=5):
+                raise RuntimeError("Test-only timeout")
+            return []
+
+    monkeypatch.setenv("ML_MODEL_RELEASE_DIR", str(tmp_path.resolve()))
+    monkeypatch.setenv("ML_TAXONOMY_VERSION", "test-only")
+    monkeypatch.setattr(
+        TfidfLinearModel,
+        "from_verified_release",
+        lambda *a, **kw: TestOnlyModel(),
+    )
+    provider = TextClassifierProvider(config_reader=object())
+    load_task = asyncio.create_task(provider.load_async())
+    try:
+        assert await asyncio.to_thread(warming.wait, 5)
+        close_task = asyncio.create_task(provider.close_async())
+        await asyncio.sleep(0)
+        assert provider.is_ready is False
+        release_warmup.set()
+        await asyncio.gather(load_task, close_task)
+        assert provider._model is None
+        assert provider.is_ready is False
+        with pytest.raises(InferenceUnavailableError, match="not ready"):
+            await provider.predict_async(["synthetic text"])
+    finally:
+        release_warmup.set()
+        await provider.close_async()
