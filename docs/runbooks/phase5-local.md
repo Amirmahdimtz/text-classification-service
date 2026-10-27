@@ -170,3 +170,9 @@ $py = ".\.venv\Scripts\python.exe"
 ```
 
 Report SHA and sanitized command results only; never return DSNs, passwords or report data. Taxonomy-focused tests overlap the independent suite and do not prove real model compatibility, secure category administrator CRUD or publication. All customer-owned runtime/model/security gates remain in [Phase 5 acceptance inputs](../phase-5-acceptance-inputs.md).
+
+## Plan v1.2.0 independent endpoint-gate regression — 2026-10-27
+
+A focused existing test now verifies the unapproved Taxonomy GET/POST management endpoints remain absent, alongside the unapproved classifier/review routes. This is **negative-route evidence, not AuthZ acceptance**. [Code 72eb5427](https://github.com/Amirmahdimtz/text-classification-service/commit/72eb5427a917ac0bb0315cd4c692d0a5a8d5b3a3), [CI 40464115968](https://github.com/Amirmahdimtz/text-classification-service/actions/runs/40464115968) SUCCESS.
+
+The existing PowerShell test commands above remain current for this exact source after safe `git status --short`, `git switch main`, `git pull --ff-only origin main`: compile, `pytest -q tests/test_phase5_host.py`, `pytest -q -m "not postgres"`, and `pytest -q -rs -m postgres` only if the isolated `*_test` URL is privately configured. Targeted tests overlap the independent count. **Windows test on newest source NOT RUN**; no model Gold/E2E or production app readiness is proven. See [Phase 5 v1.2 review](../phase-5-v1.2-alignment.md).
