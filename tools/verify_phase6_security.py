@@ -24,6 +24,7 @@ def source_paths() -> list[Path]:
     candidates = list((ROOT / "src").rglob("*.py"))
     candidates += list((ROOT / "src" / "host" / "res").glob("*.yaml"))
     candidates += [ROOT / "Dockerfile", ROOT / "compose.yaml"]
+    candidates += [ROOT / "deploy" / "compose.staging.yaml"]
     candidates += list((ROOT / ".github" / "workflows").glob("*.yml"))
     return sorted(path for path in candidates if path.is_file())
 

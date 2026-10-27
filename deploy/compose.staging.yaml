@@ -1,0 +1,47 @@
+# Isolated API-only infrastructure staging, not an authorized Production release.
+name: text-classification-service-staging
+
+services:
+  api:
+    image: ${TCS_STAGING_IMAGE:?Provide an approved immutable image digest}
+    env_file:
+      - ${TCS_STAGING_ENV_FILE:?Provide an absolute, uncommitted staging environment file}
+    environment:
+      ENV_TYPE: production
+      PGSSLROOTCERT: /run/certs/postgres-ca.pem
+    networks:
+      - shared_db
+    ports:
+      - "127.0.0.1:${TCS_STAGING_PORT:?Choose an unused non-8000 localhost port}:8000"
+    volumes:
+      - type: bind
+        source: ${TCS_STAGING_DB_CA_FILE:?Provide the approved PostgreSQL CA certificate path}
+        target: /run/certs/postgres-ca.pem
+        read_only: true
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=64m
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    init: true
+    pids_limit: ${TCS_STAGING_PIDS:?Set an Ops-approved process limit}
+    cpus: ${TCS_STAGING_CPUS:?Set an Ops-approved CPU limit}
+    mem_limit: ${TCS_STAGING_MEMORY:?Set an Ops-approved RAM limit}
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; r=urllib.request.urlopen('http://127.0.0.1:8000/health/ready', timeout=3); assert r.status == 200 and r.headers.get('X-Readiness-Scope') == 'database'"
+      interval: 20s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+networks:
+  shared_db:
+    external: true
+    name: simorgh-db-net
