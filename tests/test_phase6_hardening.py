@@ -24,3 +24,12 @@ def test_phase6_source_scanner_has_no_false_dependency_on_test_fixtures():
 
 def test_environment_reference_is_not_a_hardcoded_secret():
     assert detect_signatures("DATABASE_URL=${COMPOSE_DATABASE_URL:?required}") == ()
+
+def test_environment_interpolation_is_not_a_literal_password():
+    # CI dynamically provisions credentials; its source contains references only.
+    assert detect_signatures(
+        "postgresql+asyncpg://phase2:${DEV_POSTGRES_PASSWORD}@db:5432/phase2_dev"
+    ) == ()
+    assert detect_signatures(
+        "postgresql+asyncpg://phase2:$DEV_POSTGRES_PASSWORD@db:5432/phase2_dev"
+    ) == ()

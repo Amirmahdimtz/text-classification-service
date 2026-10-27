@@ -11,7 +11,7 @@ SIGNATURES = {
     "aws_access_key": re.compile(r"\b(?:AKIA|ASIA)[A-Z0-9]{16}\b"),
     "github_token": re.compile(r"\bgh[pousr]_[A-Za-z0-9]{30,}\b"),
     "literal_postgres_password": re.compile(
-        r"postgresql\+asyncpg://[^\s/:\"@]+:[^\s/\"@]+@",
+        r"postgresql\+asyncpg://[^\s/:\"@]+:[^\s/\"@$({]+@",
         re.IGNORECASE,
     ),
 }
