@@ -94,8 +94,15 @@ def create_app() -> FastAPI:
             is_ready = False
         if not is_ready:
             logger.warning("readiness_failed")
-            return JSONResponse(status_code=503, content={"status": "not_ready"})
-        return {"status": "ready"}
+            return JSONResponse(
+                status_code=503, content={"status": "not_ready"},
+                headers={"X-Readiness-Scope": "database"},
+            )
+        # This probe is DB-only. It must never be used as model/release readiness.
+        return JSONResponse(
+            content={"status": "ready"},
+            headers={"X-Readiness-Scope": "database"},
+        )
 
     try:
         web.mount(app)

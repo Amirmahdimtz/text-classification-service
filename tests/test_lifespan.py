@@ -29,6 +29,8 @@ def test_lifespan_database_gate_and_cleanup(monkeypatch, available):
             response = client.get("/health/ready")
             assert response.status_code == 200
             assert response.json() == {"status": "ready"}
+            assert response.headers["X-Readiness-Scope"] == "database"
+            assert not hasattr(app.state, "model")
     else:
         with pytest.raises(RuntimeError, match="Database is not ready"):
             with TestClient(app):

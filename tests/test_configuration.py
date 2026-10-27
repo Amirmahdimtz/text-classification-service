@@ -44,3 +44,18 @@ def test_malformed_ipv6_dsn_is_sanitized(monkeypatch):
     monkeypatch.setenv("DATABASE_URL", "postgresql+asyncpg://[broken-host/prod")
     with pytest.raises(ConfigurationError, match="malformed"):
         ConfigReader()
+
+@pytest.mark.parametrize("url", [
+    "postgresql+asyncpg://service:PRIVATE_VALUE@example.test:70000/prod?ssl=verify-full",
+    "postgresql+asyncpg://service:PRIVATE_VALUE@example.test:invalid/prod?ssl=verify-full",
+    "postgresql+asyncpg://service:PRIVATE_VALUE@example.test/prod?ssl=verify-full#fragment",
+    "postgresql+asyncpg://service:PRIVATE_VALUE@example.test/prod?ssl=verify-full\n",
+    "postgresql+asyncpg://service:PRIVATE_VALUE@example.test/prod?ssl=verify-full\t",
+])
+def test_phase6_production_rejects_ambiguous_dsn_without_secret_disclosure(monkeypatch, url):
+    monkeypatch.setenv("ENV_TYPE", "production")
+    monkeypatch.setenv("DATABASE_URL", url)
+    with pytest.raises(ConfigurationError) as failure:
+        ConfigReader()
+    assert "PRIVATE_VALUE" not in str(failure.value)
+    assert url not in str(failure.value)

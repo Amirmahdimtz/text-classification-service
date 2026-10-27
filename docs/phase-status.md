@@ -1,13 +1,13 @@
 # Phase status
 **Project:** text-classification-service
-**Current phase:** PHASE 5 — End-to-End Integration, Quality & Resilience (independent scope only)
+**Current phase:** PHASE 6 — restricted independent production hardening under ADR-014
 **Marker:** PHASE_5_IMPLEMENTED_AWAITING_VERIFICATION
 **Previous Phase 4 marker (unchanged):** PHASE_4_IMPLEMENTED_AWAITING_VERIFICATION
 **Previous Phase 3 marker (unchanged):** PHASE_3_IMPLEMENTED_AWAITING_VERIFICATION
 **Previous verified marker:** PHASE_2_COMPLETE_READY_FOR_PHASE_3
-**Status as of:** 2026-10-24
-**Progression Authorization:** `CONDITIONAL_PROGRESSION_APPROVED` **for narrowly scoped independent Phase 6 verification/hardening only** ([ADR-014](decisions/ADR-014-phase6-conditional-technical-entry.md)); **Phase 6 NOT STARTED** and requires a separate explicit start command. Previous Phase 5 conditional entry was authorized in [ADR-013](decisions/ADR-013-phase5-conditional-entry-authorization.md) and exercised in its recorded Phase 5 start.
-**Next phase:** Phase 6 NOT STARTED; only ADR-014 independently authorized tasks may begin **after** an explicit `فاز ۶ را شروع کن` command and fresh main/CI audit. Real model verification and final employer acceptance are still mandatory.
+**Status as of:** 2026-10-27
+**Progression Authorization:** `CONDITIONAL_PROGRESSION_APPROVED` for *only* P6-02/04/06/12 independent subsets ([ADR-014](decisions/ADR-014-phase6-conditional-technical-entry.md)). Separate explicit owner Phase 6 start received 2026-10-27. This is not Phase 5 completion or a production authorization.
+**Next phase:** Phase 6 **IN PROGRESS / RESTRICTED SCOPE**. Previous P3/4/5 markers unchanged; Production Acceptance BLOCKED by external contracts and real verification.
 **Documentation snapshot verified:** 0834bfe31be38a618981d1b814254b7282bb51d6 (GitHub main; 26 Phase 1 documents/tool files added after README initialization).
 
 ## Revised phase-gate decision (ADR-008)
@@ -246,3 +246,12 @@ The prior Phase 3 verification debt remains open as documented above; local synt
 - **New Project Source:** owner-uploaded `Text_Classification_Service_Implementation_Plan_FA_v1.2.0.md` supersedes the earlier v1.1.0 for phase scheduling/design, under the mandatory architecture guide. Five decision packages DYN-01..05 may be unknown until **before final Phase 6 acceptance**. See [ADR-016](decisions/ADR-016-dynamic-late-binding-policy.md) and [Phase 5 task/gate alignment](phase-5-v1.2-alignment.md). Project Source update itself is not a GitHub commit.
 - **P5-05/P5-07 independent test:** new negative Taxonomy HTTP route assertions in `tests/test_phase5_host.py` prove unapproved read/admin routes still return 404, with safe request headers; **not proof of AuthN/AuthZ/record isolation**. [Source commit 72eb5427](https://github.com/Amirmahdimtz/text-classification-service/commit/72eb5427a917ac0bb0315cd4c692d0a5a8d5b3a3); [CI 40464115968](https://github.com/Amirmahdimtz/text-classification-service/actions/runs/40464115968) on exact SHA **SUCCESS**: independent 114 PASSED/1 optional SKIPPED/5 DESELECTED; isolated PostgreSQL 5 PASSED/1 SKIPPED; synthetic ML 30 PASSED (overlap); dependency compatibility and strict OSV passed at scan time. Latest source Windows LOCAL_USER NOT RUN, real model/server verification NOT RUN.
 - **Preserved distinct statuses:** Official Phase 5 marker `PHASE_5_IMPLEMENTED_AWAITING_VERIFICATION` (full DoD NO-GO). Separate ADR-014 Phase 6 narrow technical scope `CONDITIONAL_PROGRESSION_APPROVED` (requires explicit `فاز ۶ را شروع کن`, **Phase 6 NOT STARTED**). P3/P4/P5 real model/security/business/Gold/performance verification **BLOCKED/DEFERRED**, owners and prerequisites in [phase-5-v1.2-alignment.md](phase-5-v1.2-alignment.md), mandatory deadline before final Phase 6 acceptance. No business Migration, Model Release, customer contract or Production readiness asserted.
+
+## Phase 6 limited independent technical start — 2026-10-27
+
+- **Entry evidence:** Explicit owner Phase 6 start command; GitHub main at audit `c33914beeaa443f9f69ce4e2ef95eddd7d652a01`, read/push access granted; [pre-change CI run #52](https://github.com/Amirmahdimtz/text-classification-service/actions/runs/40464565247) SUCCESS. This does **not** verify new Phase 6 changes.
+- **Authorized scope:** ADR-014 `CONDITIONAL_PROGRESSION_APPROVED` only for independent P6-02 environment/DSN failure validation, P6-04 existing API/database-only health and lifecycle, P6-06 bounded source credential/dependency scan and redaction regressions, P6-12 evidence and local runbook. Other work requires its own authorization and prerequisites.
+- **Engineering record:** database URL port/control/fragment ambiguity rejected without printing credentials, DB-only readiness indicated with `X-Readiness-Scope: database`, limited known-secret-signature source scan introduced to CI, regression cases, [P6 ledger](phase-6-execution.md) and [local runbook](runbooks/phase6-local.md). No new business Controller, SQLAlchemy model, Alembic revision, activated inference, fake provider or confidential data.
+- **Formal markers preserved:** `PHASE_3_IMPLEMENTED_AWAITING_VERIFICATION`, `PHASE_4_IMPLEMENTED_AWAITING_VERIFICATION`, `PHASE_5_IMPLEMENTED_AWAITING_VERIFICATION`. Phase 6 is **STARTED / LIMITED SCOPE** (working state, not formal completed marker); final `PROJECT_PRODUCTION_READY_ACCEPTED` **BLOCKED**.
+- **Tests at documentation authoring:** Phase 6 commit/CI `NOT RUN`; LOCAL_USER latest revision `NOT RUN`. Historical green CI is not new-source evidence. SERVER_MODEL Gold/OOD/real E2E/load/backup/UAT `BLOCKED/DEFERRED`.
+- **Deferred verification owners and checkpoint:** P3-01/03/04–12 ML+Data Owner; P4-02/04/05/10 ML/Product/Review, P4-07/08/09 Security/Review/Product; P5 business-specific P5-01–07/11/12 Product/Security/Engineering, P5-08/09/10 ML/Operations/Engineering; P6-01/03/05/07–11/13 Operations/Security/Product/ML/Employer. See [task-by-task exact owners, reasons and final gate](phase-6-execution.md) and [Risk Register](risk-register.md). All due **before final Phase 6 acceptance**; approvals DYN-01..05 remain TBD/BLOCKED.

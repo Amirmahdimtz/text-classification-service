@@ -22,6 +22,7 @@ async def test_liveness_independent_of_readiness_and_safe_headers():
         ready = await client.get("/health/ready")
     assert live.status_code == 200 and live.json() == {"status": "alive"}
     assert ready.status_code == 503 and ready.json() == {"status": "not_ready"}
+    assert ready.headers["X-Readiness-Scope"] == "database"
     assert "X-Request-ID" in live.headers
     assert live.headers["X-Content-Type-Options"] == "nosniff"
     assert "/api/v1/text_classification/classify" not in [r.path for r in app.routes]

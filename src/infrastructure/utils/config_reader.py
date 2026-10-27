@@ -39,12 +39,18 @@ class ConfigReader:
         if self.get("vault.enabled") is not False:
             raise ConfigurationError("Vault backend is not configured; vault.enabled must be false")
         db_url = os.environ.get("DATABASE_URL", "")
+        # urllib silently strips some control characters; reject ambiguous DSNs
+        # before parsing. Never include a credential-bearing URL in errors.
+        if not db_url or any(char.isspace() or ord(char) < 32 or ord(char) == 127 for char in db_url):
+            raise ConfigurationError("DATABASE_URL is missing or malformed")
         try:
             parts = urlsplit(db_url)
             hostname = parts.hostname
+            _ = parts.port  # Reject invalid or out-of-range ports before engine creation.
         except ValueError:
             raise ConfigurationError("DATABASE_URL is malformed") from None
-        if parts.scheme != "postgresql+asyncpg" or not hostname or not parts.path.strip("/"):
+        if (parts.scheme != "postgresql+asyncpg" or not hostname or
+                not parts.path.strip("/") or parts.fragment):
             raise ConfigurationError("DATABASE_URL must be a valid postgresql+asyncpg DSN from environment")
         if env == "production":
             # Refuse TLS without server hostname/certificate verification.

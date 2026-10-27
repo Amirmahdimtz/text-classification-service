@@ -76,6 +76,11 @@ def test_readiness_failures_and_recovery_are_503_not_500(monkeypatch):
         assert [lost.status_code, raised.status_code, restored.status_code] == [503, 503, 200]
         assert lost.json() == raised.json() == {"status": "not_ready"}
         assert restored.json() == {"status": "ready"}
+        assert all(
+            response.headers["X-Readiness-Scope"] == "database"
+            for response in (lost, raised, restored)
+        )
+        assert not hasattr(client.app.state, "model")
         assert "PRIVATE_DB_HOST" not in raised.text
         assert client.get("/health/live").status_code == 200
     assert engine.disposed
