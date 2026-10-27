@@ -35,12 +35,20 @@ async def test_existing_http_contract_and_unapproved_routes_remain_closed():
         ready = await client.get("/health/ready")
         unapproved = await client.post("/api/v1/text_classification/classify", json={"text": "synthetic"})
         review = await client.get("/api/v1/review")
+        taxonomy_read = await client.get("/api/v1/taxonomy/categories")
+        taxonomy_manage = await client.post(
+            "/api/v1/taxonomy/categories",
+            json={"code": "SYNTH-TEST-ONLY", "title": "synthetic"},
+        )
         schema = await client.get("/openapi.json")
 
     assert live.status_code == 200 and live.json() == {"status": "alive"}
     assert ready.status_code == 503 and ready.json() == {"status": "not_ready"}
-    assert unapproved.status_code == review.status_code == schema.status_code == 404
-    for response in (live, ready, unapproved, review, schema):
+    assert all(
+        response.status_code == 404
+        for response in (unapproved, review, taxonomy_read, taxonomy_manage, schema)
+    )
+    for response in (live, ready, unapproved, review, taxonomy_read, taxonomy_manage, schema):
         UUID(response.headers["X-Request-ID"])
         assert response.headers["X-Content-Type-Options"] == "nosniff"
         assert response.headers["Referrer-Policy"] == "no-referrer"
