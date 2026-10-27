@@ -46,3 +46,18 @@
 - Environment-specific execution: [Phase 6 Windows runbook](runbooks/phase6-local.md); authorized existing offline CLI capabilities and missing real evaluation scripts: [Phase 3 server guide](runbooks/phase3-server.md). Do not invent future server commands.
 
 **Markers:** P3/P4/P5 `IMPLEMENTED_AWAITING_VERIFICATION` unchanged; Phase 6 **IN PROGRESS / RESTRICTED** is a descriptive development state, not final completion. `PROJECT_PRODUCTION_READY_ACCEPTED` **BLOCKED** pending full real evidence and written employer acceptance.
+
+## Verified CI and focused remediation — 2026-10-27
+
+**Source SHA:** [`813a8b08179fbf8c06dce4d09ea8296b7aee014a`](https://github.com/Amirmahdimtz/text-classification-service/commit/813a8b08179fbf8c06dce4d09ea8296b7aee014a). [GitHub Actions run #54](https://github.com/Amirmahdimtz/text-classification-service/actions/runs/40467522160) completed SUCCESS **all four jobs on this exact SHA**:
+
+| REMOTE / AVAILABLE job | Actual commands / evidence | Result |
+| --- | --- | --- |
+| independent | `python -m compileall -q src tests tools`; `python tools/verify_phase1_docs.py`; `python tools/verify_phase6_security.py`; `python -m pytest -q -m 'not postgres'` | Compile PASSED; doc validator 27 required files PASS; bounded source scan 43 files PASS; 123 PASSED / 1 SKIPPED / 5 DESELECTED / 2 WARNINGS |
+| integration | `docker compose config --quiet`, Docker build/start and API smoke (`/health/live`, DB-only `/health/ready`); `python -m pytest -q -m postgres`; `python -m alembic -c src/infrastructure/alembic/alembic.ini current` and `upgrade head` against CI-created isolated `phase2_test` | 5 PASSED / 1 SKIPPED / 123 DESELECTED / 2 WARNINGS; Docker/API/Alembic smoke PASSED; no business schema revision |
+| ml-independent | `python -m compileall -q src tools tests`; offline synthetic ML test modules in CI workflow | 30 PASSED, overlaps independent test modules; **not real model quality** |
+| dependency-security | `python -m pip check`; `python -m pip_audit --local --vulnerability-service osv --strict --timeout 60` | No broken requirements; no known vulnerabilities **at scan time** |
+
+**Root cause and correction:** First [CI #53](https://github.com/Amirmahdimtz/text-classification-service/actions/runs/40467358784) on source `52d46ec...` FAILED independent signature-scan step: an *environment-variable reference*, not a hard-coded credential, inside the approved CI-generated PostgreSQL DSN matched the literal-secret rule. Focused follow-up [commit `813a8b0`](https://github.com/Amirmahdimtz/text-classification-service/commit/813a8b08179fbf8c06dce4d09ea8296b7aee014a) excludes shell interpolation for that specific signature and adds explicit negative regression. Other three jobs of #53 PASSED; #54 repeated **all four** and PASSED. The scanner remains intentionally bounded, not a full historical secrets audit.
+
+**Verification debt unchanged:** LOCAL_USER Windows source `813a8b0` **NOT RUN**; authorized SERVER_MODEL dataset/Gold/OOD, model E2E, authentic reviewer AuthN/AuthZ, production recovery/load/backup and UAT **BLOCKED/DEFERRED / NOT RUN**. Two existing Starlette/httpx and AnyIO dependency deprecation warnings remain. No employer Security/Privacy/ML acceptance occurred. `PROJECT_PRODUCTION_READY_ACCEPTED` stays **BLOCKED**.
