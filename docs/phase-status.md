@@ -331,3 +331,8 @@ The prior Phase 3 verification debt remains open as documented above; local synt
 
 - Owner showed the only name-filtered systemd timer: `dpkg-db-backup.timer` (last 2026-10-28 00:00:33 UTC, next 2026-10-29 00:00:00 UTC). It is a `dpkg` package-manager metadata backup, **not a PostgreSQL backup**. Hence timer discovery adds **no evidence** of PostgreSQL backup or successful restore. External/cron backup mechanisms remain NOT VERIFIED; cannot conclude backups do not exist.
 - Ops must establish authorized backup/isolated restore and rollback, and Security must approve CA/TLS before shared DB change or project staging. `HOST-02 BLOCKED`; formal P3/P4/P5 markers, ADR-014 Phase 6 restricted scope and `PROJECT_PRODUCTION_READY_ACCEPTED` unchanged.
+
+## Backup name-search result — 2026-10-28
+
+- Owner-reported read-only scans: `OTHER_BACKUP_SERVICE_CANDIDATES=0` (non-dpkg systemd service names) and `BACKUP_CRON_FILENAME_CANDIDATES=0` (selected standard Cron directory filenames; pasted awk appears partly corrupted). This is limited **discovery evidence**, not proof that PostgreSQL lacks scheduled backups, user crontabs, external snapshots or test restores.
+- Backup owner/schedule/retention/restore **NOT VERIFIED**, WAL archiving still `off`. Ops/Security must verify recoverability before any shared TLS change. HOST-02 BLOCKED; P3/P4/P5 official phase markers, ADR-014 restricted scope and PROJECT_PRODUCTION_READY_ACCEPTED remain unchanged.

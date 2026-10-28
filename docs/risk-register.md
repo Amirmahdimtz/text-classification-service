@@ -209,3 +209,8 @@
 ## R-18 recovery assurance: dpkg timer is not PostgreSQL backup — 2026-10-28
 
 - Single systemd timer matched by generic `backup` regex was owner-verified as `dpkg-db-backup.timer`, the Ubuntu package-manager metadata backup, **not PostgreSQL backup evidence**. Physical/logical backup, off-host storage, recovery test, RPO/RTO and backup ownership remain NOT VERIFIED; absence of other mechanisms is also NOT VERIFIED. Avoid inaccurate PASS/FAILED claims from timer-name matches. Owner Ops/Security; establish verified recovery/rollback before any shared Postgres TLS or mount changes. `HOST-02` and production acceptance stay BLOCKED.
+
+## Shared PostgreSQL backup discovery remains inconclusive — 2026-10-28
+
+- Owner's limited name-based service/cron filename scans reported **0 non-dpkg systemd backup service candidates** and **0 selected cron filenames** (Cron awk paste partly malformed). Neither search includes user crontabs, all scheduler naming variants, external backup infrastructure or restore success. **Do not equate no matching names with no backups.** Risk owner Ops/Security; approved backup inventory, independent storage, verified isolated restore and rollback remain HIGH-priority prerequisites before shared PostgreSQL TLS changes.
+- `HOST-02` remains BLOCKED (`ssl=off`, missing/unreadable configured TLS material); no actual deployment/production acceptance.
