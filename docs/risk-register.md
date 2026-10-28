@@ -195,3 +195,8 @@
 ## Shared storage/change blast-radius discovery — 2026-10-28
 
 - **HOST-02/R-18 and operations risk (Ops/Security; HIGH):** network `simorgh-db-net` has **4 attached containers** at owner observation time. PostgreSQL container has an **RO bind** and **RW volume**; respective destinations and backup/restore status are unknown. Neither count proves active consumers or successful recovery. Do not assume data persistence/backup from mount type. Require a mapped PGDATA mount, responsible backup owner, last tested restore evidence, compatible TLS cert/CA and certificate-name, coordinated client plan and rollback before shared-postgres reload/restart or new staging connection. Existing SSL-off blocker and final acceptance status unchanged.
+
+## R-18/HOST-02 — verified PGDATA mount; TLS files missing or inaccessible — 2026-10-28
+
+- Owner inspection confirmed RW Docker volume mounted at active PGDATA `/var/lib/postgresql/data` and RO password-secret bind `/run/secrets/postgres_password`. The volume alone is **not** a backup, and restoration/last good backup remain unverified. Read-only tests by OS user postgres reported `MISSING_OR_UNREADABLE` for both configured TLS cert and key locations, while `ssl=off`. No secret content disclosed, and absence vs permission failure is unresolved.
+- Ops/Security must approve CA/server certificate DNS SAN `shared-postgres`, private-key access, external read-only mounts, isolation/consumer compatibility, tested recovery and rollback before modifying shared PostgreSQL. An additional Compose mount may require container recreation/downtime; never promise no-disruption activation. `HOST-02` HIGH/BLOCKED, client `ssl=verify-full` non-negotiable, final acceptance BLOCKED.
