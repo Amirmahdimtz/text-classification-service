@@ -321,3 +321,8 @@ The prior Phase 3 verification debt remains open as documented above; local synt
 
 - Owner read-only output: PGDATA **/var/lib/postgresql/data** matches a **RW Docker volume** mount; separate RO bind **/run/secrets/postgres_password**. This confirms volume mapping, **not backup integrity**. Checks executed as OS user postgres against configured `ssl_cert_file` and `ssl_key_file` returned **MISSING_OR_UNREADABLE** for both; missing vs unreadable not distinguished. Existing `ssl=off` persists.
 - **HOST-02 Ops/Security BLOCKED:** approved server cert/key and trustworthy CA/DNS SAN, safe mount/Compose change window, tested backup/rollback and dedicated project database/role not verified. No shared service changes, Staging launch or Production acceptance. Phase markers and limited ADR-014 authorization unchanged.
+
+## Shared PostgreSQL WAL/backup read-only findings — 2026-10-28
+
+- Owner SQL reported `archive_mode=off`, `archive_timeout=0`, `full_page_writes=on`, `wal_level=replica`; `pg_stat_archiver` count **0 archived / 0 failed**, no last success/failure recorded. Built-in continuous WAL archiving for PITR **is not enabled**, but this does **not** establish absence of independent backups or snapshots. Valid backup, storage isolation, schedule, retention, approved RPO/RTO and successful test restore **NOT VERIFIED** (Ops).
+- No changes to shared PostgreSQL, no backup generation or restore performed, no TLS enablement or staging deployment. HOST-02 remains BLOCKED until server certificate/key, trust and actual `ssl=verify-full` test, and approved backup/rollback/consumer compatibility. All official phase markers and production acceptance unchanged.
