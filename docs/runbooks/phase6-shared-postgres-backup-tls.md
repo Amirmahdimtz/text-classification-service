@@ -99,3 +99,11 @@ A verified test restore of one permitted DB does not prove ability to recover al
 - PostgreSQL 17 [pg_restore](https://www.postgresql.org/docs/17/app-pgrestore.html)
 - PostgreSQL 17 [Secure TCP/IP with SSL](https://www.postgresql.org/docs/17/ssl-tcp.html)
 - PostgreSQL 17 [pg_hba.conf](https://www.postgresql.org/docs/17/auth-pg-hba-conf.html)
+
+## Off-host storage option after real host inventory (2026-10-28)
+
+Owner's non-mutating checks found **0 mounted remote filesystems** in a selected NFS/CIFS/SSHFS/rclone/s3fs set and no `restic`, `rclone`, `aws`, `pgbackrest` or `barman` executable in the invoking user's PATH. This does not mean there are no external storage providers/snapshots, but no usable off-host destination has been approved.
+
+**Recommended candidate:** a separately administered, jurisdiction-approved S3-compatible HTTPS Object Storage destination, with least-privilege independent credentials and a **restic** repository using client-side encryption. [Restic supports S3-compatible backends](https://restic.readthedocs.io/en/stable/030_preparing_a_new_repo.html); use a pinned, verified binary/container version only under an approved installation/release change. Credential custody, encryption passphrase/key recovery, bucket retention/versioning/immutability, operator access and off-host availability are separate design approvals. Do not assume Object Lock makes restic pruning safe; test the chosen provider/retention behavior in isolation.
+
+**Strict next-step gates:** select approved storage provider/region, confirm legal data residence and reachable HTTPS/DNS without bypassing certificate checks; approve database/data-owner scope, backup cadence and recovery RPO/RTO; verify provider key rotation/recovery and cost/quota. Then authorize a non-sensitive connectivity probe. Only after these inputs can an owner-approved isolated backup and real restore plan be executed. No existing shared project data may be copied, no system-wide pip/apt/docker changes made and no new external account or bucket claimed here.

@@ -37,3 +37,7 @@ Owner's aggregate query found **4 connectable non-template databases totaling 38
 - PostgreSQL 17 [SQL Dump](https://www.postgresql.org/docs/17/backup-dump.html)
 - PostgreSQL 17 [Secure TCP/IP Connections with SSL](https://www.postgresql.org/docs/17/ssl-tcp.html)
 - PostgreSQL 17 [Client Authentication and pg_hba.conf](https://www.postgresql.org/docs/17/auth-pg-hba-conf.html)
+
+## Off-host storage selection checkpoint (2026-10-28)
+
+Owner read-only host inspection showed no known remote FS mounts and no `restic`, `rclone`, `aws`, `pgbackrest` or `barman` executable in the invoking PATH. This means backup tooling/destination is **not confirmed on this host**, not that external storage or independently managed backups do not exist. **Proposed preferred candidate:** HTTPS S3-compatible external Object Storage with a client-encrypted restic repository and separately protected credentials/keys, subject to Ops/Data Owner/Security provider/data-jurisdiction approval and HTTPS reachability. This supplements—not replaces—PostgreSQL-consistent dumps and genuine isolated restore verification. If off-host endpoint, custody and authorization cannot be supplied, **REC-02/03 BLOCKED**; do not substitute the shared server's 360 GB free space as disaster recovery. No provider chosen, tools installed or data copied; phase status unchanged.
