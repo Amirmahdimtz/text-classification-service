@@ -326,3 +326,8 @@ The prior Phase 3 verification debt remains open as documented above; local synt
 
 - Owner SQL reported `archive_mode=off`, `archive_timeout=0`, `full_page_writes=on`, `wal_level=replica`; `pg_stat_archiver` count **0 archived / 0 failed**, no last success/failure recorded. Built-in continuous WAL archiving for PITR **is not enabled**, but this does **not** establish absence of independent backups or snapshots. Valid backup, storage isolation, schedule, retention, approved RPO/RTO and successful test restore **NOT VERIFIED** (Ops).
 - No changes to shared PostgreSQL, no backup generation or restore performed, no TLS enablement or staging deployment. HOST-02 remains BLOCKED until server certificate/key, trust and actual `ssl=verify-full` test, and approved backup/rollback/consumer compatibility. All official phase markers and production acceptance unchanged.
+
+## Backup systemd timer false positive — 2026-10-28
+
+- Owner showed the only name-filtered systemd timer: `dpkg-db-backup.timer` (last 2026-10-28 00:00:33 UTC, next 2026-10-29 00:00:00 UTC). It is a `dpkg` package-manager metadata backup, **not a PostgreSQL backup**. Hence timer discovery adds **no evidence** of PostgreSQL backup or successful restore. External/cron backup mechanisms remain NOT VERIFIED; cannot conclude backups do not exist.
+- Ops must establish authorized backup/isolated restore and rollback, and Security must approve CA/TLS before shared DB change or project staging. `HOST-02 BLOCKED`; formal P3/P4/P5 markers, ADR-014 Phase 6 restricted scope and `PROJECT_PRODUCTION_READY_ACCEPTED` unchanged.
