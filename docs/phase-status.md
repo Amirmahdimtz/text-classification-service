@@ -311,3 +311,8 @@ The prior Phase 3 verification debt remains open as documented above; local synt
 
 - Owner-provided read-only server logs confirm `pg_hba_file_rules` rule 2/5 **exact IPv4 loopback**, 3/6 **exact IPv6 loopback** (all four use `trust`); rule 1/4 UNIX_SOCKET `trust`; rule 7 `scram-sha-256` ANY_NETWORK. Docker port `5432/tcp` **NOT_PUBLISHED** on host; PostgreSQL `listen_addresses = '*'` in container. The HBA view is on-disk configuration, not proven currently loaded rules; shared Docker network traffic can reach the DB regardless of unpublished host port.
 - `ssl=off` **still blocks** production `ssl=verify-full`. Owner Ops/Security to approve verified CA and certificate hostname, dedicated database/role, shared-client compatibility and reviewed backup/rollback before any mutation. No official phase marker, progression authorization or project acceptance change.
+
+## Shared PostgreSQL attach/mount discovery — 2026-10-28
+
+- Owner read-only inspection: network `simorgh-db-net` **4 attached containers**; shared PostgreSQL `shared-postgres-postgres-1` **one RO bind mount and one RW volume mount**. Counts alone do **not** prove database consumer count, persistent PGDATA path, TLS material, Backup integrity or recovery capability. Mount targets/permissions, verified backup/restore and cross-project change window remain NOT VERIFIED. `ssl=off` keeps `HOST-02 BLOCKED` (Ops/Security) before staging.
+- No infrastructure modifications, no project database provisioning or deployment; previous formal phase markers, ADR-014 conditional scope and `PROJECT_PRODUCTION_READY_ACCEPTED` BLOCKED unchanged.
