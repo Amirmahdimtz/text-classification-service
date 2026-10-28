@@ -306,3 +306,8 @@ The prior Phase 3 verification debt remains open as documented above; local synt
 
 - Owner-provided `pg_hba_file_rules` order/scope view: **local trust** rules 1 and 4; **host trust** rules 2, 3, 5 and 6 restricted to **LOOPBACK**; rule 7 **host scram-sha-256** for ALL_DATABASES / ALL_ROLES / ANY_NETWORK. No observed all-network `trust` rule; initial unknown HBA scope is now **partially resolved** by the summarized on-disk rule view, not proven effective runtime policy. PostgreSQL exposure by host port publication, listen addresses and firewall is NOT VERIFIED.
 - Local trust and wide SCRAM reachability remain security-review items; **HOST-02 BLOCKED** because the server still reports `ssl=off` against mandatory `ssl=verify-full`. No changes to shared services, credentials, project phase markers or production acceptance.
+
+## Exact PostgreSQL HBA scope and Docker port verified — 2026-10-28
+
+- Owner-provided read-only server logs confirm `pg_hba_file_rules` rule 2/5 **exact IPv4 loopback**, 3/6 **exact IPv6 loopback** (all four use `trust`); rule 1/4 UNIX_SOCKET `trust`; rule 7 `scram-sha-256` ANY_NETWORK. Docker port `5432/tcp` **NOT_PUBLISHED** on host; PostgreSQL `listen_addresses = '*'` in container. The HBA view is on-disk configuration, not proven currently loaded rules; shared Docker network traffic can reach the DB regardless of unpublished host port.
+- `ssl=off` **still blocks** production `ssl=verify-full`. Owner Ops/Security to approve verified CA and certificate hostname, dedicated database/role, shared-client compatibility and reviewed backup/rollback before any mutation. No official phase marker, progression authorization or project acceptance change.
