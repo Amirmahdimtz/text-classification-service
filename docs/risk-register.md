@@ -176,3 +176,8 @@
 
 - **Software test debt (Engineering):** owner full independent run at e7d6f90 after sklearn installation: pip check PASSED, **128 PASSED, 0 SKIPPED, 5 DESELECTED, 2 deprecation WARNINGS**. This is more complete local software evidence, not an ML Gold/OOD benchmark, privacy review or live DB integration result. Review dependency warning migration separately.
 - **HOST-02 / R-18 (Ops/Security; still BLOCKING):** actual shared PostgreSQL reports `ssl=off`; do not waive production `ssl=verify-full` or alter shared resources without approved TLS/CA/cert-name, DB/role separation and rollback. Confirmed next checkpoint: before starting any project Staging service against the shared database. Final Phase 6 acceptance remains BLOCKED.
+
+## Additional PostgreSQL HBA trust exposure investigation — 2026-10-28
+
+- **R-18 / HOST-02 (HIGH, Ops/Security; BLOCKED):** Owner read-only query reports `ssl=off`, existing configured cert/key paths **not verified**, and `pg_hba_file_rules` counts **4 host/trust, 1 host/scram-sha-256, 2 local/trust**, with zero invalid entries. A `host trust` match allows passwordless TCP connection within the rule's scope; first-match order and host address/DB/user scopes are currently **UNKNOWN**. Avoid claiming broad internet exposure or that scram protects all connections. Run privacy-preserving read-only scope/order audit; coordinate all shared service users, backups and rollback before modifying anything. Checkpoint before any staging connection.
+- There were **4 client backend connections** at sampling time, but count includes the audit query and is not a verified project/tenant inventory. Owner Ops/Security. Phase 6 gate and Production acceptance remain BLOCKED.
