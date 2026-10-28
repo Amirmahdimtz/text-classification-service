@@ -76,3 +76,7 @@ This repository preparation does **not** authorize a server deployment. Operatio
 - P6-07/08/09/11/12/13: approved RPO/RTO, isolated backup/restore drill, dashboards/on-call, drift/retrain governance, real UAT, handover and employer sign-off.
 
 No real model release, secure business API, production-specific schema migration or authorized representative dataset has been provided. All such gates remain BLOCKED/DEFERRED; **do not interpret staging config as readiness to serve customer reports**. PROJECT_PRODUCTION_READY_ACCEPTED remains BLOCKED.
+
+## Shared PostgreSQL recovery and TLS change dependency
+
+The existing shared database has `ssl=off`; configured server certificate/key are missing or unreadable. Recovery and off-host storage have **not** been verified. Before starting any staging API, follow the separate [shared PostgreSQL backup/restore and TLS change gate](phase6-shared-postgres-backup-tls.md) (proposed [ADR-018](../decisions/ADR-018-shared-postgres-recovery-tls-plan.md)). This link is **documentation only**, not approval to run backups, change shared database mounts or restart PostgreSQL.

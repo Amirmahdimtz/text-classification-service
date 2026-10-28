@@ -218,3 +218,8 @@
 ## Shared backup capacity measured, recovery still unverified — 2026-10-28
 
 - **Ops + Data Owner / HIGH:** owner read-only query showed 4 connectable non-template PostgreSQL databases totaling 38 MB; host `/srv` filesystem had 360 GB free at inspection time. This modest logical DB size is **not** proof of an approved backup, off-host retention, consistent cluster-wide snapshot, or successful restore. A logical dump may omit global roles/tablespaces; plaintext/insecure exports could expose other projects' data or role password verifiers. Require written authorized scope, encryption, access restriction, off-host copy and isolated restore test/RPO/RTO before producing a backup or any shared PostgreSQL TLS change. `HOST-02` remains BLOCKED (`ssl=off`).
+
+## Operational recovery/TLS plan without shared-service mutation — 2026-10-28
+
+- **HIGH / Ops + Security + Data Owners:** [ADR-018](decisions/ADR-018-shared-postgres-recovery-tls-plan.md) and [runbook](runbooks/phase6-shared-postgres-backup-tls.md) define prospective recovery and TLS change gates. Four DB / 38 MB and same-host 360 GB free do not establish encrypted off-host backups or a successful isolated restore. No off-host storage target, data-extraction rights, RPO/RTO, operator or consumer maintenance window is approved. A logical `pg_dump` candidate is not PITR and global roles may carry sensitive verifier metadata. Do not extract shared data or create backup jobs without authorized scope.
+- **HOST-02/TLS-01** remains HIGH/BLOCKED: ssl=off and cert/key missing or unreadable, no CA/SAN/real verified-TLS test. Actual container mount changes may require recreation/downtime. Governance unchanged; recovery/TLS designs are not P6-07 verification or Production approval.
