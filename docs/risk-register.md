@@ -214,3 +214,7 @@
 
 - Owner's limited name-based service/cron filename scans reported **0 non-dpkg systemd backup service candidates** and **0 selected cron filenames** (Cron awk paste partly malformed). Neither search includes user crontabs, all scheduler naming variants, external backup infrastructure or restore success. **Do not equate no matching names with no backups.** Risk owner Ops/Security; approved backup inventory, independent storage, verified isolated restore and rollback remain HIGH-priority prerequisites before shared PostgreSQL TLS changes.
 - `HOST-02` remains BLOCKED (`ssl=off`, missing/unreadable configured TLS material); no actual deployment/production acceptance.
+
+## Shared backup capacity measured, recovery still unverified — 2026-10-28
+
+- **Ops + Data Owner / HIGH:** owner read-only query showed 4 connectable non-template PostgreSQL databases totaling 38 MB; host `/srv` filesystem had 360 GB free at inspection time. This modest logical DB size is **not** proof of an approved backup, off-host retention, consistent cluster-wide snapshot, or successful restore. A logical dump may omit global roles/tablespaces; plaintext/insecure exports could expose other projects' data or role password verifiers. Require written authorized scope, encryption, access restriction, off-host copy and isolated restore test/RPO/RTO before producing a backup or any shared PostgreSQL TLS change. `HOST-02` remains BLOCKED (`ssl=off`).

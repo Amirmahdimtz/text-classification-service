@@ -336,3 +336,8 @@ The prior Phase 3 verification debt remains open as documented above; local synt
 
 - Owner-reported read-only scans: `OTHER_BACKUP_SERVICE_CANDIDATES=0` (non-dpkg systemd service names) and `BACKUP_CRON_FILENAME_CANDIDATES=0` (selected standard Cron directory filenames; pasted awk appears partly corrupted). This is limited **discovery evidence**, not proof that PostgreSQL lacks scheduled backups, user crontabs, external snapshots or test restores.
 - Backup owner/schedule/retention/restore **NOT VERIFIED**, WAL archiving still `off`. Ops/Security must verify recoverability before any shared TLS change. HOST-02 BLOCKED; P3/P4/P5 official phase markers, ADR-014 restricted scope and PROJECT_PRODUCTION_READY_ACCEPTED remain unchanged.
+
+## Shared PostgreSQL backup capacity sizing — 2026-10-28
+
+- Owner's read-only aggregate query reported **4 connectable non-template databases totaling 38 MB**; host filesystem **491G total / 110G used / 360G available**. No names, records or credentials were collected. These figures permit sizing an **authorized** logical-backup/isolated-restore design but do not prove backups, restore capacity or off-host resilience. Backups of shared project data require data-owner authorization; cluster-global roles may need separate protected recovery. Ops to approve RPO/RTO, scope, encrypted destination, off-host copy and isolated restore before shared PostgreSQL TLS changes.
+- No new database/role, dump, backup, restore, TLS settings or staging service activated. HOST-02 BLOCKED and PHASE 6 restricted; P3/P4/P5 status markers and PROJECT_PRODUCTION_READY_ACCEPTED unchanged.
