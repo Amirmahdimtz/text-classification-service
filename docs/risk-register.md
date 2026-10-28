@@ -171,3 +171,8 @@
 
 - **Optional test debt reduced, NOT final ML validation:** owner-reported Ubuntu ML dependency install and pip check PASSED with scikit-learn==1.8.0; tests/test_baseline_model.py and tests/test_text_classifier_provider.py **7 PASSED**. Earlier missing-`sklearn` skip is no longer open on this environment; tests overlap with independent suite and are not seven novel model acceptance results. Risk owner ML/Engineering; future model gates retain genuine lawful Gold/OOD/calibration, grounded explanation and real model E2E requirements.
 - **HOST-02 remains HIGH/BLOCKED (Ops/Security):** shared PostgreSQL server `ssl=off` cannot satisfy staging `ssl=verify-full`. No credentials, DB schema, shared containers or TLS settings changed. Approved remediation and verified TLS/hostname/role isolation remain prerequisites before staging deployment. CI run 40652612638 on 30ea0c7 SUCCESS for independent pathways only.
+
+## Independent Ubuntu regression closed; TLS and real data acceptance not closed — 2026-10-28
+
+- **Software test debt (Engineering):** owner full independent run at e7d6f90 after sklearn installation: pip check PASSED, **128 PASSED, 0 SKIPPED, 5 DESELECTED, 2 deprecation WARNINGS**. This is more complete local software evidence, not an ML Gold/OOD benchmark, privacy review or live DB integration result. Review dependency warning migration separately.
+- **HOST-02 / R-18 (Ops/Security; still BLOCKING):** actual shared PostgreSQL reports `ssl=off`; do not waive production `ssl=verify-full` or alter shared resources without approved TLS/CA/cert-name, DB/role separation and rollback. Confirmed next checkpoint: before starting any project Staging service against the shared database. Final Phase 6 acceptance remains BLOCKED.
